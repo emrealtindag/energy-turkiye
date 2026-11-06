@@ -36,7 +36,7 @@ MONTHS = ["", "Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "
 COLS = ["wind_mwh", "solar_mwh", "total_mwh"]
 
 st.set_page_config(
-    page_title="Enerji Nabzı · Türkiye Rüzgâr ve Güneş Enerjisi Yapay Zekâ İzleme ve Tahmin Platformu",
+    page_title="Enerji Nabzı · Türkiye Rüzgar ve Güneş Enerjisi İzleme ve Yapay Zeka ile Tahmin Platformu",
     page_icon=None,
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -596,11 +596,11 @@ st.markdown(
     """
     <div class="hero">
         <div class="hero-top">
-            <span class="eyebrow">TÜRKİYE ELEKTRİK ŞEBEKESİ · ENERJİ NABZI</span>
+            <span class="eyebrow">YENİLENEBİLİR ENERJİ İZLEME PLATFORMU · ENERJİ NABZI</span>
             <span class="status-pill"><i></i>EPİAŞ Gerçek Verisi</span>
         </div>
-        <h1>Türkiye Rüzgâr ve Güneş Enerjisi Yapay Zekâ İzleme ve Tahmin Platformu</h1>
-        <p>Saatlik üretimi, bölgesel hava durumunu, rüzgâr + güneş payını, yapay zekâ üretim tahminlerini ve tepe üretim saatlerini tek bir ekranda inceleyin.</p>
+        <h1>Türkiye Rüzgar ve Güneş Enerjisi İzleme ve Yapay Zeka ile Tahmin Platformu</h1>
+        <p>Saatlik üretimi, bölgesel hava durumunu, rüzgar + güneş payını, yapay zeka üretim tahminlerini ve tepe üretim saatlerini tek bir ekranda inceleyin.</p>
     </div>
     """,
     unsafe_allow_html=True,
@@ -646,7 +646,7 @@ if ci_data:
 
 tab_grid, tab_ai, tab_esg = st.tabs([
     "Canlı Şebeke & Hava Durumu",
-    "Yapay Zekâ Tahmini (24s – 3 Ay)",
+    "Yapay Zeka Tahmini (24s – 3 Ay)",
     "Kurumsal ESG Simülatörü",
 ])
 
@@ -678,7 +678,7 @@ with tab_grid:
                 <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
                     <div class="w-card">
                         <div class="w-card-header">
-                            <span>Rüzgâr Durumu</span>
+                            <span>Rüzgar Durumu</span>
                             <span style="color:#059669; font-weight:700;">Canlı</span>
                         </div>
                         <div class="w-card-val">{tr_format(w_info['wind_speed_kmh'], 1)} <span class="unit">km/s</span></div>
@@ -710,7 +710,7 @@ with tab_grid:
                 <div>
                     <div class="weather-section-title">Türkiye Canlı Potansiyel Haritası</div>
                     <div style="font-size:0.82rem; color:#64748B; margin-top:2px; margin-bottom:4px;">
-                        7 coğrafi bölgenin anlık rüzgâr hızı ve meteorolojik dağılımı (Detaylar için bölgelerin üzerine gelin)
+                        7 coğrafi bölgenin anlık rüzgar hızı ve meteorolojik dağılımı (Detaylar için bölgelerin üzerine gelin)
                     </div>
                 </div>
                 """,
@@ -748,7 +748,7 @@ with tab_grid:
                     ], axis=-1),
                     hovertemplate="<b>%{text}</b><br>"
                                   "Havza: %{customdata[4]}<br>"
-                                  "Rüzgâr Hızı: %{customdata[0]} km/s (%{customdata[1]})<br>"
+                                  "Rüzgar Hızı: %{customdata[0]} km/s (%{customdata[1]})<br>"
                                   "Sıcaklık: %{customdata[2]} °C<br>"
                                   "Güneş Işınımı: %{customdata[3]} W/m²<extra></extra>",
                     mode="markers+text",
@@ -912,7 +912,7 @@ with tab_grid:
     if missing_nans > 0:
         st.markdown(
             f'<div class="warn-box"><b>Eksik Ölçüm Uyarısı:</b> Seçili dönemde '
-            f'Rüzgâr: {wind_nans} saat, Güneş: {solar_nans} saat, Toplam: {total_nans} saat eksik (NaN) ölçüm tespit edildi. '
+            f'Rüzgar: {wind_nans} saat, Güneş: {solar_nans} saat, Toplam: {total_nans} saat eksik (NaN) ölçüm tespit edildi. '
             f'Veri bütünlüğü için doldurma veya interpolasyon yapılmamıştır.</div>',
             unsafe_allow_html=True,
         )
@@ -950,10 +950,10 @@ with tab_grid:
 
     st.markdown(
         f'<div class="grid-6">'
-        + build_card("wind", "Rüzgâr Üretimi", tr_format(wind_sum) if wind_sum is not None else "Veri Yok", "MWh", "Dönem toplamı")
+        + build_card("wind", "Rüzgar Üretimi", tr_format(wind_sum) if wind_sum is not None else "Veri Yok", "MWh", "Dönem toplamı")
         + build_card("sun", "Güneş Üretimi", tr_format(solar_sum) if solar_sum is not None else "Veri Yok", "MWh", "Dönem toplamı")
-        + build_card("total", "Rüzgâr + Güneş", tr_format(pair_sum) if pair_sum is not None else "Veri Yok", "MWh", "İki kaynağın toplamı")
-        + build_card("pct", "Rüzgâr + Güneş Payı", share_str, "", "Toplam üretimdeki oran")
+        + build_card("total", "Rüzgar + Güneş", tr_format(pair_sum) if pair_sum is not None else "Veri Yok", "MWh", "İki kaynağın toplamı")
+        + build_card("pct", "Rüzgar + Güneş Payı", share_str, "", "Toplam üretimdeki oran")
         + build_card("peak", "Saatlik Zirve", peak_val_str, peak_unit, peak_time_str)
         + build_card("esg", "Önlenen CO₂ Salımı", esg_data["co2_formatted"], "ton", "~0,45 tCO₂ / MWh ikamesi")
         + "</div>",
@@ -962,7 +962,7 @@ with tab_grid:
 
     st.markdown(
         '<div class="warn-box"><b>Güneş verisi hakkında:</b> EPİAŞ üretim serisi lisanssız (çatı ve öz tüketim) güneş üretimini '
-        'tam yansıtmayabilir. Gerçek güneş üretimi ve rüzgâr + güneş payı gösterilen değerlerden daha yüksek olabilir.</div>',
+        'tam yansıtmayabilir. Gerçek güneş üretimi ve rüzgar + güneş payı gösterilen değerlerden daha yüksek olabilir.</div>',
         unsafe_allow_html=True,
     )
 
@@ -973,7 +973,7 @@ with tab_grid:
                 """
                 <div>
                     <h4 class="chart-title">Saatlik Üretim Dağılımı</h4>
-                    <p class="chart-sub">Dönem boyunca rüzgâr ve güneş santrallerinin saatlik üretim profili</p>
+                    <p class="chart-sub">Dönem boyunca rüzgar ve güneş santrallerinin saatlik üretim profili</p>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -983,7 +983,7 @@ with tab_grid:
                 """
                 <div style="display:flex; justify-content:flex-end; align-items:center; height:100%;">
                     <div class="legend-pill">
-                        <span><i style="background:#059669"></i> Rüzgâr</span>
+                        <span><i style="background:#059669"></i> Rüzgar</span>
                         <span><i style="background:#EAB308"></i> Güneş</span>
                     </div>
                 </div>
@@ -1001,13 +1001,13 @@ with tab_grid:
             go.Scatter(
                 x=chart_data.index,
                 y=chart_data["wind_mwh"],
-                name="Rüzgâr",
+                name="Rüzgar",
                 mode="lines",
                 connectgaps=False,
                 line=dict(color=WIND_COLOR, width=2.2),
                 fill="tozeroy",
                 fillcolor="rgba(5, 150, 105, 0.08)",
-                hovertemplate="Rüzgâr: %{y:,.0f} MWh<extra></extra>",
+                hovertemplate="Rüzgar: %{y:,.0f} MWh<extra></extra>",
             )
         )
 
@@ -1070,12 +1070,12 @@ with tab_grid:
             go.Scatter(
                 x=hour_labels,
                 y=prof["wind_mwh"],
-                name="Rüzgâr Ort.",
+                name="Rüzgar Ort.",
                 mode="lines",
                 line=dict(color=WIND_COLOR, width=2.4),
                 fill="tozeroy",
                 fillcolor="rgba(5, 150, 105, 0.08)",
-                hovertemplate="Rüzgâr: %{y:,.0f} MWh<extra></extra>",
+                hovertemplate="Rüzgar: %{y:,.0f} MWh<extra></extra>",
             )
         )
         fig_prof.add_trace(
@@ -1108,7 +1108,7 @@ with tab_grid:
                 <div class="chart-header">
                     <div>
                         <h4 class="chart-title">24 Saatlik Üretim Profili</h4>
-                        <p class="chart-sub">Günün saatlerine göre ortalama rüzgâr ve güneş dağılımı</p>
+                        <p class="chart-sub">Günün saatlerine göre ortalama rüzgar ve güneş dağılımı</p>
                     </div>
                 </div>
                 """,
@@ -1135,15 +1135,15 @@ with tab_grid:
                 with col_heat_ctrl:
                     heat_src = st.segmented_control(
                         "Kaynak",
-                        options=["Rüzgâr", "Güneş"],
-                        default="Rüzgâr",
+                        options=["Rüzgar", "Güneş"],
+                        default="Rüzgar",
                         key="heat_src_segmented",
                         label_visibility="collapsed",
                     )
                     if not heat_src:
-                        heat_src = "Rüzgâr"
+                        heat_src = "Rüzgar"
 
-                target_col = "wind_mwh" if heat_src == "Rüzgâr" else "solar_mwh"
+                target_col = "wind_mwh" if heat_src == "Rüzgar" else "solar_mwh"
 
                 pivot_m = clean_df.assign(day=clean_df["ts"].dt.date, hr=clean_df["ts"].dt.hour).pivot_table(
                     index="day", columns="hr", values=target_col, aggfunc="mean"
@@ -1154,7 +1154,7 @@ with tab_grid:
                         z=pivot_m.to_numpy(),
                         x=[f"{i:02d}:00" for i in range(24)],
                         y=[f"{x.day} {MONTHS[x.month]}" for x in pivot_m.index],
-                        colorscale="Greens" if heat_src == "Rüzgâr" else "YlOrBr",
+                        colorscale="Greens" if heat_src == "Rüzgar" else "YlOrBr",
                         xgap=2,
                         ygap=2,
                         colorbar=dict(title="MWh", thickness=10),
@@ -1205,7 +1205,7 @@ with tab_ai:
                     st.markdown(
                         """
                         <div>
-                            <h4 class="chart-title">Yapay Zekâ Yenilenebilir Üretim Projeksiyonu</h4>
+                            <h4 class="chart-title">Yapay Zeka Yenilenebilir Üretim Projeksiyonu</h4>
                             <p class="chart-sub">1 yıllık EPİAŞ saatlik verisi ve astronomik güneş fiziğiyle eğitilen orta ve uzun vadeli üretim projeksiyonu</p>
                         </div>
                         """,
@@ -1260,7 +1260,7 @@ with tab_ai:
                                 <div class="w-card-sub">Ortalama: ~{tr_format(ml_res.get('avg_total', 0))} MWh/saat</div>
                             </div>
                             <div class="w-card">
-                                <div class="w-card-header"><span>Tahmini Rüzgâr Üretimi</span><span style="color:#059669; font-weight:700;">%{ml_res.get('wind_pct', 0)} Pay</span></div>
+                                <div class="w-card-header"><span>Tahmini Rüzgar Üretimi</span><span style="color:#059669; font-weight:700;">%{ml_res.get('wind_pct', 0)} Pay</span></div>
                                 <div class="w-card-val">{tr_format(ml_res.get('total_wind', 0))} <span class="unit">MWh</span></div>
                                 <div class="w-card-sub">Ortalama: ~{tr_format(ml_res.get('avg_wind', 0))} MWh/saat</div>
                             </div>
@@ -1315,13 +1315,13 @@ with tab_ai:
                         go.Scatter(
                             x=plot_x,
                             y=plot_df["wind_pred"],
-                            name="Tahmini Rüzgâr (Yeşil)",
+                            name="Tahmini Rüzgar (Yeşil)",
                             mode="lines+markers" if horizon_hours > 720 else "lines",
                             line=dict(color=WIND_COLOR, width=2.2),
                             marker=dict(size=5) if horizon_hours > 720 else None,
                             fill="tozeroy",
                             fillcolor="rgba(5, 150, 105, 0.08)",
-                            hovertemplate=f"Tahmini Rüzgâr: %{{y:,.0f}} {hover_unit}<extra></extra>",
+                            hovertemplate=f"Tahmini Rüzgar: %{{y:,.0f}} {hover_unit}<extra></extra>",
                         )
                     )
                     fig_ml.add_trace(
@@ -1380,7 +1380,7 @@ with tab_ai:
                             width="stretch",
                         )
                     with col_f_down_right:
-                        st.caption(f"Gelecek {horizon_label.lower()} boyunca tüm saatlik rüzgâr, güneş ve toplam üretim projeksiyon dökümü.")
+                        st.caption(f"Gelecek {horizon_label.lower()} boyunca tüm saatlik rüzgar, güneş ve toplam üretim projeksiyon dökümü.")
 
                     st.markdown(
                         f"""
@@ -1405,7 +1405,7 @@ with tab_esg:
                     """
                     <div>
                         <h4 class="chart-title">COP31 Kurumsal Sürdürülebilirlik (ESG) & Fabrika Karbon Raporu</h4>
-                        <p class="chart-sub">Şirketinizin veya fabrikanızın elektrik tüketimini ulusal rüzgâr ve güneş payı ile eşleştirerek Kapsam 2 (Scope 2) karbon raporunu hesaplayın</p>
+                        <p class="chart-sub">Şirketinizin veya fabrikanızın elektrik tüketimini ulusal rüzgar ve güneş payı ile eşleştirerek Kapsam 2 (Scope 2) karbon raporunu hesaplayın</p>
                     </div>
                     """,
                     unsafe_allow_html=True,
@@ -1441,7 +1441,7 @@ with tab_esg:
                         <div class="w-card">
                             <div class="w-card-header"><span>Temiz Enerji Tedariği</span><span style="color:#059669; font-weight:700;">Şebeke Payı</span></div>
                             <div class="w-card-val">%{tr_format(esg_sim['clean_share_pct'], 1)}</div>
-                            <div class="w-card-sub">{tr_format(esg_sim['clean_consumed_mwh'])} MWh rüzgâr ve güneşten karşılandı</div>
+                            <div class="w-card-sub">{tr_format(esg_sim['clean_consumed_mwh'])} MWh rüzgar ve güneşten karşılandı</div>
                         </div>
                         <div class="w-card">
                             <div class="w-card-header"><span>Önlenen Karbon Emisyonu</span><span style="color:#0D9488; font-weight:700;">Tasarruf</span></div>
@@ -1474,7 +1474,7 @@ with tab_esg:
                     go.Scatter(
                         x=comp_data["ts"],
                         y=comp_data["clean_mwh"],
-                        name="Şebekeden Karşılanan Rüzgâr + Güneş (MWh)",
+                        name="Şebekeden Karşılanan Rüzgar + Güneş (MWh)",
                         mode="lines",
                         line=dict(color="#059669", width=2.2),
                         fill="tozeroy",
@@ -1545,7 +1545,7 @@ with tab_esg:
                     """
                     <div style="font-size:0.78rem; color:#375240; background:#EAF2EC; border:1px solid #DCE7DE; border-radius:8px; padding:12px 16px; margin-top:8px; line-height:1.6;">
                         <b>Metodoloji & Yasal Sorumluluk Reddi (Disclaimer):</b> Şirket veya fabrikanın saatlik elektrik tüketimi, 
-                        EPİAŞ ulusal iletim şebekesindeki o saatin rüzgâr ve güneş payı ile GHG Protocol Scope 2 pazar bazlı yaklaşımına göre eşleştirilerek simüle edilmiştir. 
+                        EPİAŞ ulusal iletim şebekesindeki o saatin rüzgar ve güneş payı ile GHG Protocol Scope 2 pazar bazlı yaklaşımına göre eşleştirilerek simüle edilmiştir. 
                         Bu sonuçlar kurumsal iç sürdürülebilirlik planlaması ve enerji optimizasyonu için karar destek amaçlı olup, 
                         bağımsız denetimden geçmiş resmi ISO 14064 doğrulama belgesi yerine geçmez.
                         <br><br>
@@ -1563,7 +1563,7 @@ st.markdown(
             Emre Altındağ & Kaan Bölek
         </div>
         <div style="font-size: 0.78rem; color: #5A7163; margin-top: 6px;">
-            Enerji Nabzı · Türkiye Rüzgâr ve Güneş Enerjisi Yapay Zekâ İzleme ve Tahmin Platformu
+            Enerji Nabzı · Türkiye Rüzgar ve Güneş Enerjisi İzleme ve Yapay Zeka ile Tahmin Platformu
         </div>
     </div>
     """,

@@ -54,11 +54,11 @@ def fetch_all_regions_weather() -> Dict[str, Dict[str, Any]]:
                     s_rad = float(solar_arr[now_hour] if now_hour < len(solar_arr) else 0.0)
 
                     if w_speed > 30:
-                        w_status = "Kuvvetli Rüzgâr / Yüksek Üretim"
+                        w_status = "Kuvvetli Rüzgar / Yüksek Üretim"
                     elif w_speed > 15:
                         w_status = "Orta Şiddette / Normal Akış"
                     else:
-                        w_status = "Sakin Rüzgâr / Düşük Akış"
+                        w_status = "Sakin Rüzgar / Düşük Akış"
 
                     if cloud < 25:
                         s_status = "Açık ve Güneşli"

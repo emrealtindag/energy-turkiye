@@ -56,7 +56,7 @@ def calculate_grid_carbon_intensity(
     else:
         status_title = "Standart Şebeke Yoğunluğu"
         status_desc = f"Şebekede temiz enerji payı %{share_pct} (Yeşil Saat eşiği: ≥%{threshold_pct}). Baz yük termik santraller tarafından karşılanıyor."
-        recommendation = "Enerji yoğun sanayi yüklerinin rüzgâr ve güneşin arttığı saatlere kaydırılması önerilir."
+        recommendation = "Enerji yoğun sanayi yüklerinin rüzgar ve güneşin arttığı saatlere kaydırılması önerilir."
 
     return {
         "carbon_intensity": int(ci),
