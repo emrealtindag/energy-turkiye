@@ -42,7 +42,7 @@ COLS = ["wind_mwh", "solar_mwh", "total_mwh"]
 
 # Sayfa Yapılandırması
 st.set_page_config(
-    page_title="Türkiye | Rüzgâr ve Güneş Paneli",
+    page_title="Enerji Nabzı · Türkiye Temiz Enerji Platformu",
     page_icon=None,
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -600,10 +600,10 @@ st.markdown(
     """
     <div class="hero">
         <div class="hero-top">
-            <span class="eyebrow">TÜRKİYE ELEKTRİK ŞEBEKESİ · COP31 ÖZEL</span>
+            <span class="eyebrow">TÜRKİYE ELEKTRİK ŞEBEKESİ · ENERJİ NABZI</span>
             <span class="status-pill"><i></i>EPİAŞ Gerçek Verisi</span>
         </div>
-        <h1>Türkiye’nin Rüzgâr ve Güneş Enerjisi</h1>
+        <h1>Enerji Nabzı: Türkiye Rüzgâr ve Güneş İzleme Platformu</h1>
         <p>Saatlik üretimi, bölgesel hava durumunu, rüzgâr + güneş payını ve tepe üretim saatlerini tek bir ekranda inceleyin.</p>
     </div>
     """,
