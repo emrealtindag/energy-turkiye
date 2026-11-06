@@ -1,5 +1,3 @@
-"""Readers for the cleaned EPİAŞ CSV files."""
-
 from datetime import date
 from pathlib import Path
 from typing import Optional, Tuple
@@ -8,14 +6,12 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 
-
 def _find_file(preferred_names: list[str]) -> Path:
     for name in preferred_names:
         p = ROOT / name
         if p.exists():
             return p
     return ROOT / preferred_names[0]
-
 
 def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     col_map = {}
@@ -33,9 +29,7 @@ def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
             col_map[col] = "Saat"
     return df.rename(columns=col_map)
 
-
 def load_generation_data(start_date: date, end_date: date) -> pd.DataFrame:
-    """Read the hourly file and return the dashboard's normalized schema."""
     gen_file = _find_file(["temiz_epias_uretim.csv", "temiz_epias_uretim (1).csv"])
     raw = pd.read_csv(gen_file, encoding="utf-8-sig", dtype={"Tarih": "string"})
     raw = _normalize_columns(raw)
@@ -64,9 +58,7 @@ def load_generation_data(start_date: date, end_date: date) -> pd.DataFrame:
         return pd.DataFrame(columns=["timestamp", "wind_mwh", "solar_mwh", "total_mwh"])
     return clean
 
-
 def get_dataset_bounds() -> Tuple[date, date]:
-    """Return the absolute earliest and latest complete date in the CSV."""
     gen_file = _find_file(["temiz_epias_uretim.csv", "temiz_epias_uretim (1).csv"])
     raw = pd.read_csv(gen_file, encoding="utf-8-sig", dtype={"Tarih": "string"})
     raw = _normalize_columns(raw)
@@ -90,16 +82,12 @@ def get_dataset_bounds() -> Tuple[date, date]:
         raise ValueError("CSV dosyasında 24 saatlik eksiksiz bir gün bulunamadı.")
     return complete_days[0], complete_days[-1]
 
-
 def get_latest_complete_window(days: int = 30) -> tuple[date, date]:
-    """Return the latest window ending on the last complete day in the CSV."""
     earliest, end = get_dataset_bounds()
     start = max(earliest, end - pd.Timedelta(days=days - 1))
     return start, end
 
-
 def load_hourly_profile() -> pd.DataFrame:
-    """Read the prepared 24-hour average profile."""
     prof_file = _find_file(["saatlik_profil.csv", "saatlik_profil (1).csv"])
     raw = pd.read_csv(prof_file, encoding="utf-8-sig")
     raw = _normalize_columns(raw)

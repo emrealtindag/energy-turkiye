@@ -1,18 +1,10 @@
-"""Local-only synthetic data used to preview the dashboard layout.
-
-This module is never used unless ENERGY_DASHBOARD_DEMO=1 is set explicitly.
-The generated values are illustrative and must not be presented as EPİAŞ data.
-"""
-
 from datetime import date, datetime, time, timedelta
 import math
 import random
 
 import pandas as pd
 
-
 def load_demo_generation_data(start_date: date, end_date: date) -> pd.DataFrame:
-    """Return repeatable, clearly synthetic hourly values for UI preview only."""
     rng = random.Random(31)
     start = datetime.combine(start_date, time.min)
     stop = datetime.combine(end_date + timedelta(days=1), time.min)
@@ -21,7 +13,6 @@ def load_demo_generation_data(start_date: date, end_date: date) -> pd.DataFrame:
     rows = []
     for timestamp in timestamps:
         hour = timestamp.hour
-        # Illustrative day curve and weather factor; not based on observed data.
         daylight = max(0.0, math.sin(math.pi * (hour - 6) / 12))
         solar = 0.0 if daylight == 0 else 3200 + 5200 * daylight * rng.uniform(0.72, 1.0)
         wind = 4700 + 1050 * math.sin((hour + timestamp.day * 2) * math.pi / 12) + rng.uniform(-700, 700)

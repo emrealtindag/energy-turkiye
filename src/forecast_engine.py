@@ -1,14 +1,8 @@
-"""Weather and Environmental Intelligence Service.
-
-Türkiye geneli ve 7 coğrafi bölge için anlık rüzgâr ve güneş hava verileri.
-"""
-
 from typing import Any, Dict
 import pandas as pd
 import requests
 import streamlit as st
 
-# Türkiye Geneli ve 7 Coğrafi Bölge Referans Koordinatları
 REGIONS: Dict[str, Dict[str, Any]] = {
     "Tüm Türkiye (Ortalama)": {"lat": 39.0, "lon": 35.0, "desc": "Ulusal Ağırlıklı Ortalama"},
     "Marmara Bölgesi": {"lat": 40.5, "lon": 28.5, "desc": "Çanakkale, Balıkesir, İstanbul, Bursa"},
@@ -22,10 +16,8 @@ REGIONS: Dict[str, Dict[str, Any]] = {
 
 CO2_AVOIDED_FACTOR = 0.45
 
-
 @st.cache_data(ttl=1800, show_spinner=False)
 def fetch_all_regions_weather() -> Dict[str, Dict[str, Any]]:
-    """Tüm Türkiye ve 7 bölge için hava durumu verilerini tek bir batch çağrıda çeker."""
     lats = [v["lat"] for v in REGIONS.values()]
     lons = [v["lon"] for v in REGIONS.values()]
 
@@ -61,7 +53,6 @@ def fetch_all_regions_weather() -> Dict[str, Dict[str, Any]]:
                     solar_arr = hourly.get("direct_normal_irradiance", [0.0])
                     s_rad = float(solar_arr[now_hour] if now_hour < len(solar_arr) else 0.0)
 
-                    # Durum metni
                     if w_speed > 30:
                         w_status = "Kuvvetli Rüzgâr / Yüksek Üretim"
                     elif w_speed > 15:
@@ -91,7 +82,6 @@ def fetch_all_regions_weather() -> Dict[str, Dict[str, Any]]:
     except Exception:
         pass
 
-    # Yedek veri
     for key in region_keys:
         results[key] = {
             "name": key,
@@ -106,9 +96,7 @@ def fetch_all_regions_weather() -> Dict[str, Dict[str, Any]]:
         }
     return results
 
-
 def calculate_esg_savings(mwh_amount: float) -> Dict[str, Any]:
-    """Üretilen temiz enerji ile önlenen CO2 miktarını hesaplar."""
     if mwh_amount is None or mwh_amount <= 0:
         return {"co2_formatted": "0"}
 

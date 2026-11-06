@@ -1,27 +1,10 @@
-"""Machine Learning Forecasting Engine with Astronomical Solar Physics.
-
-Kullanılan Model: HistGradientBoostingRegressor (Scikit-Learn)
-Öznitelik Mühendisliği: 
-- Astronomik Güneş Yüksekliği Açısı (Solar Elevation Angle - Mevsimsel Gün Doğumu/Batımı)
-- Gecikme Değişkenleri: Lag-1, Lag-2, Lag-24
-- Hareketli Ortalamalar: Rolling Mean-6, Rolling Mean-24
-- Döngüsel Zaman Kodlaması (Sin/Cos)
-"""
-
 from typing import Any, Dict
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import HistGradientBoostingRegressor
 import streamlit as st
 
-
 def calculate_solar_elevation(dt: pd.Timestamp, lat: float = 39.0) -> float:
-    """Belirli bir tarih ve saat için Türkiye enleminde (39°N) gerçek astronomik güneş yüksekliğini (derece) hesaplar.
-    
-    Bu fonksiyon sayesinde model; Kasım ayında güneşin 07:15'te doğup 18:00'de battığını,
-    Haziran ayında 05:00'te doğup 20:30'da battığını, Mart ayında ise 06:30'da doğduğunu
-    fiziksel güneş deklinasyon formülü ile hesaplar.
-    """
     doy = dt.dayofyear
     decl = np.radians(23.45 * np.sin(np.radians(360.0 / 365.0 * (284 + doy))))
     lat_r = np.radians(lat)
@@ -34,9 +17,7 @@ def calculate_solar_elevation(dt: pd.Timestamp, lat: float = 39.0) -> float:
     elevation = np.degrees(np.arcsin(sin_elev))
     return float(elevation)
 
-
 def create_feature_matrix(df: pd.DataFrame, target_col: str) -> pd.DataFrame:
-    """Zaman serisi öznitelik matrisi oluşturur."""
     d = df.copy()
     if "ts" not in d.columns:
         d["ts"] = pd.to_datetime(d["timestamp"])
@@ -57,14 +38,12 @@ def create_feature_matrix(df: pd.DataFrame, target_col: str) -> pd.DataFrame:
     d["rolling_mean_24"] = d[target_col].shift(1).rolling(24).mean()
     return d.dropna().reset_index(drop=True)
 
-
 def train_and_evaluate_models(
     historical_df: pd.DataFrame,
     horizon_hours: int = 24,
     *args,
     **kwargs,
 ) -> Dict[str, Any]:
-    """Rüzgâr ve güneş için Makine Öğrenmesi modellerini eğitir ve belirlenen vadede tahmin üretir."""
     if historical_df.empty or len(historical_df) < 120:
         return {}
 
@@ -86,21 +65,18 @@ def train_and_evaluate_models(
         "rolling_mean_24",
     ]
 
-    # 1. RÜZGÂR MODELİ
     wind_features = create_feature_matrix(df, "wind_mwh")
     X_w = wind_features[feature_cols].values
     y_w = wind_features["wind_mwh"].values
     wind_model = HistGradientBoostingRegressor(max_iter=90, random_state=42)
     wind_model.fit(X_w, y_w)
 
-    # 2. GÜNEŞ MODELİ (Astronomik Doğuş/Batış Korumalı)
     solar_features = create_feature_matrix(df, "solar_mwh")
     X_s = solar_features[feature_cols].values
     y_s = solar_features["solar_mwh"].values
     solar_model = HistGradientBoostingRegressor(max_iter=90, random_state=42)
     solar_model.fit(X_s, y_s)
 
-    # 3. İLERİYE DÖNÜK ÖZYİNELİ (RECURSIVE) TAHMİN (24s / 7 G / 30 G / 3 Ay / 6 Ay / 1 Yıl)
     last_ts = df["ts"].iloc[-1]
     future_times = [last_ts + pd.Timedelta(hours=i + 1) for i in range(horizon_hours)]
 
@@ -111,7 +87,6 @@ def train_and_evaluate_models(
     s_elevs = np.array([calculate_solar_elevation(t) for t in future_times], dtype=np.float64)
     s_fluxes = np.maximum(0.0, np.sin(np.radians(s_elevs)))
 
-    # Yüksek Performanslı Rüzgâr Tahmini
     w_history = list(df["wind_mwh"].values)
     wind_predictions = []
     feat_w = np.empty((1, 11), dtype=np.float64)
@@ -132,7 +107,6 @@ def train_and_evaluate_models(
         wind_predictions.append(p_val)
         w_history.append(p_val)
 
-    # Yüksek Performanslı Güneş Tahmini
     s_history = list(df["solar_mwh"].values)
     solar_predictions = []
     feat_s = np.empty((1, 11), dtype=np.float64)

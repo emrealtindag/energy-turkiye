@@ -1,5 +1,3 @@
-"""Türkiye rüzgâr ve güneş üretim paneli."""
-
 from datetime import date, timedelta
 import logging
 import os
@@ -11,7 +9,6 @@ import streamlit as st
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("enerji_dashboard")
 
-# Kaan'ın 1 Yıllık (8.760 saat) veri katmanı (epias_csv)
 try:
     from src.epias_csv import (
         get_dataset_bounds,
@@ -25,7 +22,6 @@ except ImportError:
     get_latest_complete_window = None
     load_hourly_profile = None
 
-# Bölgesel Hava Durumu, ESG ve Makine Öğrenmesi Modülleri
 from src.forecast_engine import REGIONS, calculate_esg_savings, fetch_all_regions_weather
 from src.ml_forecaster import train_and_evaluate_models
 from src.esg_analytics import (
@@ -34,13 +30,11 @@ from src.esg_analytics import (
     simulate_enterprise_esg,
 )
 
-# Renk Paleti ve Sabitler
 WIND_COLOR = "#059669"
 SUN_COLOR = "#EAB308"
 MONTHS = ["", "Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"]
 COLS = ["wind_mwh", "solar_mwh", "total_mwh"]
 
-# Sayfa Yapılandırması
 st.set_page_config(
     page_title="Enerji Nabzı · Türkiye Rüzgâr ve Güneş Enerjisi İzleme, İnceleme Platformu",
     page_icon=None,
@@ -48,7 +42,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# Özel Modern Tasarım (CSS)
 st.markdown(
     """<style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..800;1,9..40,400..800&family=Inter:wght@400;500;600;700;800&display=swap');
@@ -537,25 +530,18 @@ div[data-testid="stTabs"] [data-baseweb="tab-border"] {
     unsafe_allow_html=True,
 )
 
-
 def tr_format(val: float, d: int = 0) -> str:
-    """Türkçe binlik ayracı nokta, ondalık virgül biçimi."""
     if val is None or pd.isna(val):
         return "–"
     return f"{val:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-
 def date_label(d: date) -> str:
-    """Tarih etiketleyici (Örn: 5 Kas 2026)."""
     return f"{d.day} {MONTHS[d.month]} {d.year}"
 
-
 def ts_label(t: pd.Timestamp) -> str:
-    """Zaman damgası etiketleyici."""
     if not isinstance(t, pd.Timestamp):
         return str(t)
     return f"{t.day} {MONTHS[t.month]} · {t:%H:%M}"
-
 
 def build_card(tone: str, label: str, val_str: str, unit: str = "", note: str = "") -> str:
     unit_html = f'<span class="u">{unit}</span>' if unit else ""
@@ -569,21 +555,15 @@ def build_card(tone: str, label: str, val_str: str, unit: str = "", note: str = 
         f'</div>'
     )
 
-
 @st.cache_data(ttl=900, show_spinner=False)
 def fetch_generation_data(start: date, end: date) -> pd.DataFrame:
-    """Kaan\'ın hazırladığı veri katmanı üzerinden saatlik veriyi çeker."""
     return load_generation_data(start, end)
-
 
 @st.cache_data(ttl=900, show_spinner=False)
 def get_cached_ml_results(start_d: date, end_d: date, horizon_h: int = 24) -> dict:
-    """Makine öğrenmesi modelini tüm 1 yıllık temel veri üzerinde önbellekli olarak eğitir ve belirtilen vadede tahmin üretir."""
     base_data = fetch_generation_data(start_d, end_d)
     return train_and_evaluate_models(base_data, horizon_hours=horizon_h)
 
-
-# Kaan\'ın 1 Yıllık (8.760 saat) veri aralığını ve 30 günlük son pencereyi belirleme
 full_start, full_end = None, None
 if get_dataset_bounds is not None:
     try:
@@ -612,11 +592,6 @@ baseline_df = fetch_generation_data(win_start, win_end)
 ci_data = calculate_grid_carbon_intensity(baseline_df) if calculate_grid_carbon_intensity is not None else None
 clean_df = baseline_df.copy()
 
-
-
-# ==========================================
-# 1. ÜST HERO BANNER (TAM GENİŞLİK)
-# ==========================================
 st.markdown(
     """
     <div class="hero">
@@ -631,9 +606,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# ==========================================
-# 1.1 CANLI DURUM ŞERİDİ (SABİT ÜST BAR)
-# ==========================================
 if ci_data:
     gw_dot_cls = "green" if ci_data["is_green_window"] else "neutral"
     st.markdown(
@@ -672,20 +644,13 @@ if ci_data:
         unsafe_allow_html=True,
     )
 
-# ==========================================
-# SEKME YAPISI: 3 ANA KOMUTA MERKEZİ
-# ==========================================
 tab_grid, tab_ai, tab_esg = st.tabs([
     "Canlı Şebeke & Hava Durumu",
-    "Yapay Zekâ Tahmini (24s – 1 Yıl)",
+    "Yapay Zekâ Tahmini (24s – 3 Ay)",
     "Kurumsal ESG Simülatörü",
 ])
 
-# ==========================================
-# SEKME 1: CANLI ŞEBEKE & HAVA DURUMU
-# ==========================================
 with tab_grid:
-    # 2. BÖLGESEL HAVA DURUMU & TÜRKİYE CANLI POTANSİYEL HARİTASI
     with st.container(border=True):
         col_w_side, col_w_map = st.columns([1, 1.3], gap="large")
         with col_w_side:
@@ -825,8 +790,6 @@ with tab_grid:
 
     st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
 
-    # 3. ÜST KONTROL & FİLTRE ÇUBUĞU (TAM GENİŞLİK)
-    # ==========================================
     with st.container(border=True):
         col_filter, col_meta = st.columns([1.6, 2], gap="large")
 
@@ -888,9 +851,6 @@ with tab_grid:
                 unsafe_allow_html=True,
             )
 
-    # ==========================================
-    # 4. VERİ DURUM YÖNETİMİ
-    # ==========================================
     state = "ok"
     df = None
 
@@ -905,7 +865,6 @@ with tab_grid:
         except Exception:
             state = "error"
 
-    # Sözleşme doğrulaması
     if state == "ok" and df is not None and not df.empty:
         if not {"timestamp", *COLS} <= set(df.columns):
             state = "schema_error"
@@ -929,9 +888,6 @@ with tab_grid:
         st.info("Seçilen tarih aralığında gösterilecek veri bulunamadı. Lütfen geçerli bir tarih aralığı seçin.")
         st.stop()
 
-    # ==========================================
-    # 5. VERİ İŞLEME VE HESAPLAMALAR
-    # ==========================================
     ts = pd.to_datetime(df["timestamp"], errors="coerce")
     tz_aware = ts.dt.tz is not None
 
@@ -948,7 +904,6 @@ with tab_grid:
     for col in COLS:
         clean_df[col] = pd.to_numeric(clean_df[col], errors="coerce")
 
-    # Eksik Değer Kontrolleri
     wind_nans = int(clean_df["wind_mwh"].isna().sum())
     solar_nans = int(clean_df["solar_mwh"].isna().sum())
     total_nans = int(clean_df["total_mwh"].isna().sum())
@@ -971,13 +926,11 @@ with tab_grid:
     pair_sum = (wind_sum or 0.0) + (solar_sum or 0.0) if (wind_sum is not None or solar_sum is not None) else None
     total_sum = valid_total.sum() if not valid_total.empty else None
 
-    # Pay Hesabı
     if total_sum is None or total_sum <= 0 or pair_sum is None:
         share_str = "Hesaplanamadı"
     else:
         share_str = f"%{tr_format((pair_sum / total_sum) * 100, 1)}"
 
-    # Saatlik Zirve Hesabı
     hourly_valid_pair = clean_df["wind_mwh"] + clean_df["solar_mwh"]
     peaks_series = hourly_valid_pair.dropna()
 
@@ -993,12 +946,8 @@ with tab_grid:
         peak_time_str = "Geçerli zirve ölçümü yok"
         peak_unit = ""
 
-    # Karbon Tasarrufu (ESG Metriği)
     esg_data = calculate_esg_savings(pair_sum if pair_sum is not None else 0.0)
 
-    # ==========================================
-    # 6. 6 SAYAÇ KARTI (TAM GENİŞLİK GRID)
-    # ==========================================
     st.markdown(
         f'<div class="grid-6">'
         + build_card("wind", "Rüzgâr Üretimi", tr_format(wind_sum) if wind_sum is not None else "Veri Yok", "MWh", "Dönem toplamı")
@@ -1011,16 +960,12 @@ with tab_grid:
         unsafe_allow_html=True,
     )
 
-    # Güneş Lisanssız Uyarısı
     st.markdown(
         '<div class="warn-box"><b>Güneş verisi hakkında:</b> EPİAŞ üretim serisi lisanssız (çatı ve öz tüketim) güneş üretimini '
         'tam yansıtmayabilir. Gerçek güneş üretimi ve rüzgâr + güneş payı gösterilen değerlerden daha yüksek olabilir.</div>',
         unsafe_allow_html=True,
     )
 
-    # ==========================================
-    # 7. 1. GRAFİK: SAATLİK ÜRETİM DAĞILIMI (TAM GENİŞLİK)
-    # ==========================================
     with st.container(border=True):
         col_t_title, col_t_legend = st.columns([1.6, 1], gap="medium")
         with col_t_title:
@@ -1052,7 +997,6 @@ with tab_grid:
 
         fig_time = go.Figure()
 
-        # Rüzgâr (Katı çizgi)
         fig_time.add_trace(
             go.Scatter(
                 x=chart_data.index,
@@ -1067,7 +1011,6 @@ with tab_grid:
             )
         )
 
-        # Güneş (Katı çizgi)
         fig_time.add_trace(
             go.Scatter(
                 x=chart_data.index,
@@ -1109,9 +1052,6 @@ with tab_grid:
 
     st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-    # ==========================================
-    # 8. 2 İKİNCİL GRAFİK (%50 - %50 EŞİT YAN YANA)
-    # ==========================================
     col_chart_left, col_chart_right = st.columns(2, gap="medium")
 
     with col_chart_left:
@@ -1244,9 +1184,6 @@ with tab_grid:
                     unsafe_allow_html=True,
                 )
 
-    # ==========================================
-    # 9. METODOLOJİ VE AÇIKLAMA NOTU (TAM GENİŞLİK)
-    # ==========================================
     st.markdown(
         """
         <div class="methodology-note">
@@ -1259,9 +1196,6 @@ with tab_grid:
         unsafe_allow_html=True,
     )
 
-# ==========================================
-# SEKME 2: YAPAY ZEKÂ ÜRETİM TAHMİNİ
-# ==========================================
 with tab_ai:
     if train_and_evaluate_models is not None:
         try:
@@ -1285,8 +1219,6 @@ with tab_ai:
                             "7 Günlük (Haftalık)",
                             "30 Günlük (Aylık)",
                             "3 Aylık (Çeyreklik)",
-                            "6 Aylık (Yarıyıl)",
-                            "1 Yıllık (Yıllık)",
                         ],
                         default="24 Saatlik (Günlük)",
                         key="ml_horizon_choice",
@@ -1304,12 +1236,6 @@ with tab_ai:
                 elif horizon_choice == "3 Aylık (Çeyreklik)":
                     horizon_hours = 2160
                     horizon_label = "3 Aylık"
-                elif horizon_choice == "6 Aylık (Yarıyıl)":
-                    horizon_hours = 4320
-                    horizon_label = "6 Aylık"
-                elif horizon_choice == "1 Yıllık (Yıllık)":
-                    horizon_hours = 8760
-                    horizon_label = "1 Yıllık"
                 else:
                     horizon_hours = 24
                     horizon_label = "24 Saatlik"
@@ -1325,7 +1251,6 @@ with tab_ai:
                     else:
                         peak_t_str = "-"
 
-                    # 4 GERÇEK VE ANLAMLI ÜRETİM TAHMİN KARTI
                     st.markdown(
                         f"""
                         <div class="grid-4">
@@ -1354,7 +1279,6 @@ with tab_ai:
                         unsafe_allow_html=True,
                     )
 
-                    # Grafiği Vade Büyüklüğüne Göre Akıllıca Grupla (10 Günlük / 5 Günlük / Saatlik)
                     if horizon_hours == 24:
                         plot_df = f_df.copy()
                         plot_x = [t.strftime("%H:00") for t in plot_df["ts"]]
@@ -1472,9 +1396,6 @@ with tab_ai:
             logger.exception("Makine tahmini hatası: %s", err)
             st.error(f"Tahmin hesaplanırken durum oluştu: {err}")
 
-
-# SEKME 3: KURUMSAL ESG SİMÜLATÖRÜ
-# ==========================================
 with tab_esg:
     if simulate_enterprise_esg is not None and ENTERPRISE_PROFILES:
         with st.container(border=True):
@@ -1537,7 +1458,6 @@ with tab_esg:
                     unsafe_allow_html=True,
                 )
 
-                # Karşılaştırma Grafiği
                 comp_data = esg_sim["comp_df"]
                 fig_esg = go.Figure()
                 fig_esg.add_trace(
@@ -1583,7 +1503,6 @@ with tab_esg:
                 )
                 st.plotly_chart(fig_esg, config={"displayModeBar": False})
 
-                # İndirilebilir Karbon Karnesi (GHG Protocol Scope 2 CSV)
                 export_rows = []
                 for _, r in comp_data.iterrows():
                     f_val = float(r["factory_mwh"])
@@ -1637,9 +1556,6 @@ with tab_esg:
                     unsafe_allow_html=True,
                 )
 
-# ==========================================
-# FOOTER: EMRE ALTINDAĞ & KAAN BÖLEK
-# ==========================================
 st.markdown(
     """
     <div style="margin-top: 50px; margin-bottom: 24px; padding-top: 22px; border-top: 1px solid #DCE7DE; text-align: center;">
@@ -1653,4 +1569,3 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-

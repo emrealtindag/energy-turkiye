@@ -1,15 +1,7 @@
-"""Enterprise ESG Carbon Reporting and Smart Green Window Analytics.
-
-Modüller:
-1. Dinamik Şebeke Karbon Yoğunluğu & Yeşil Saat (Green Window) Hesaplayıcısı
-2. COP31 Kurumsal Kapsam 2 (Scope 2) Fabrika & Şirket Tüketim Eşleme Simülatörü
-"""
-
 from typing import Any, Dict, Optional
 import numpy as np
 import pandas as pd
 import streamlit as st
-
 
 ENTERPRISE_PROFILES: Dict[str, Dict[str, Any]] = {
     "Organize Sanayi Fabrikası (OSB)": {
@@ -29,12 +21,10 @@ ENTERPRISE_PROFILES: Dict[str, Dict[str, Any]] = {
     },
 }
 
-
 def calculate_grid_carbon_intensity(
     df: pd.DataFrame,
     threshold_pct: float = 15.0,
 ) -> Dict[str, Any]:
-    """Şebekenin anlık karbon yoğunluğunu ve Yeşil Saat durumunu hesaplar."""
     if df.empty:
         return {
             "carbon_intensity": 510,
@@ -52,15 +42,11 @@ def calculate_grid_carbon_intensity(
     solar = float(last_row["solar_mwh"]) if pd.notna(last_row["solar_mwh"]) else 0.0
     pair = wind + solar
 
-    # Gerçek son saatteki oran: (wind + solar) / total
     share = min(1.0, max(0.0, pair / total))
     share_pct = round(share * 100, 1)
 
-    # Türkiye elektrik şebekesi karbon emisyon yoğunluğu (gCO2 / kWh)
-    # Termik taban: ~560 gCO2/kWh, Yenilenebilir: ~15 gCO2/kWh
     ci = round(560.0 * (1.0 - share) + 15.0 * share, 0)
 
-    # Belirlenen eşik ve üzeri yenilenebilir payında şebeke "Yeşil Saat" dilimindedir
     is_green = share_pct >= threshold_pct
 
     if is_green:
@@ -82,13 +68,11 @@ def calculate_grid_carbon_intensity(
         "recommendation": recommendation,
     }
 
-
 def simulate_enterprise_esg(
     profile_name: str,
     df: pd.DataFrame,
     custom_df: Optional[pd.DataFrame] = None,
 ) -> Dict[str, Any]:
-    """Bir şirketin veya fabrikanın tüketimini EPİAŞ yenilenebilir verisiyle eşleştirerek Scope 2 ESG raporunu üretir."""
     if df.empty:
         return {}
 
@@ -99,7 +83,6 @@ def simulate_enterprise_esg(
     work_df = work_df.sort_values("ts").reset_index(drop=True)
     n_hours = len(work_df)
 
-    # Tüketim serisi oluşturma
     if custom_df is not None and not custom_df.empty and "tuketim_mwh" in custom_df.columns:
         consumption = custom_df["tuketim_mwh"].values[:n_hours]
         if len(consumption) < n_hours:
@@ -109,14 +92,11 @@ def simulate_enterprise_esg(
         base = prof["base_mwh"]
         factor = prof["day_factor"]
         hours = work_df["ts"].dt.hour.values
-        # Gündüz/gece vardiya çarpanı
         shift_mult = np.where((hours >= 8) & (hours <= 19), factor, 1.0)
-        # Gerçekçi saatlik dalgalanma (izole rastgelelik)
         rng = np.random.default_rng(42)
         noise = rng.uniform(0.92, 1.08, size=n_hours)
         consumption = base * shift_mult * noise
 
-    # Şebekeden gelen yenilenebilir payı
     clean_series = work_df[["wind_mwh", "solar_mwh"]].sum(axis=1, min_count=1).fillna(0)
     total_series = work_df["total_mwh"].fillna(1)
     grid_share = np.clip(clean_series / total_series, 0.0, 1.0).values
@@ -126,13 +106,10 @@ def simulate_enterprise_esg(
     total_clean = float(np.sum(clean_consumed))
     clean_pct = round((total_clean / total_consumed * 100), 1) if total_consumed > 0 else 0.0
 
-    # Önlenen CO2 (0.45 ton CO2 / MWh)
     avoided_co2 = round(total_clean * 0.45, 1)
 
-    # Kapsam 2 Karbon Yoğunluğu (gCO2 / kWh)
     scope2_ci = round(560.0 * (1.0 - clean_pct / 100.0) + 15.0 * (clean_pct / 100.0), 0)
 
-    # ESG Skoru
     if clean_pct >= 20.0:
         esg_grade = "A+ (Üst Düzey Yeşil Tedarik)"
     elif clean_pct >= 14.0:
