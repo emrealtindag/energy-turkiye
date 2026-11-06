@@ -36,7 +36,7 @@ def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 def load_generation_data(start_date: date, end_date: date) -> pd.DataFrame:
     """Read the hourly file and return the dashboard's normalized schema."""
-    gen_file = _find_file(["temiz_epias_uretim (1).csv", "temiz_epias_uretim.csv"])
+    gen_file = _find_file(["temiz_epias_uretim.csv", "temiz_epias_uretim (1).csv"])
     raw = pd.read_csv(gen_file, encoding="utf-8-sig", dtype={"Tarih": "string"})
     raw = _normalize_columns(raw)
 
@@ -67,7 +67,7 @@ def load_generation_data(start_date: date, end_date: date) -> pd.DataFrame:
 
 def get_dataset_bounds() -> Tuple[date, date]:
     """Return the absolute earliest and latest complete date in the CSV."""
-    gen_file = _find_file(["temiz_epias_uretim (1).csv", "temiz_epias_uretim.csv"])
+    gen_file = _find_file(["temiz_epias_uretim.csv", "temiz_epias_uretim (1).csv"])
     raw = pd.read_csv(gen_file, encoding="utf-8-sig", dtype={"Tarih": "string"})
     raw = _normalize_columns(raw)
 
@@ -100,7 +100,7 @@ def get_latest_complete_window(days: int = 30) -> tuple[date, date]:
 
 def load_hourly_profile() -> pd.DataFrame:
     """Read the prepared 24-hour average profile."""
-    prof_file = _find_file(["saatlik_profil (1).csv", "saatlik_profil.csv"])
+    prof_file = _find_file(["saatlik_profil.csv", "saatlik_profil (1).csv"])
     raw = pd.read_csv(prof_file, encoding="utf-8-sig")
     raw = _normalize_columns(raw)
 
