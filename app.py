@@ -42,7 +42,7 @@ COLS = ["wind_mwh", "solar_mwh", "total_mwh"]
 
 # Sayfa Yapılandırması
 st.set_page_config(
-    page_title="Enerji Nabzı · Türkiye Temiz Enerji Platformu",
+    page_title="Enerji Nabzı · Türkiye Rüzgâr ve Güneş Enerjisi İzleme, İnceleme Platformu",
     page_icon=None,
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -603,7 +603,7 @@ st.markdown(
             <span class="eyebrow">TÜRKİYE ELEKTRİK ŞEBEKESİ · ENERJİ NABZI</span>
             <span class="status-pill"><i></i>EPİAŞ Gerçek Verisi</span>
         </div>
-        <h1>Enerji Nabzı: Türkiye Rüzgâr ve Güneş İzleme Platformu</h1>
+        <h1>Enerji Nabzı: Türkiye Rüzgâr ve Güneş Enerjisi İzleme ve İnceleme Platformu</h1>
         <p>Saatlik üretimi, bölgesel hava durumunu, rüzgâr + güneş payını ve tepe üretim saatlerini tek bir ekranda inceleyin.</p>
     </div>
     """,
@@ -656,7 +656,7 @@ if ci_data:
 # ==========================================
 tab_grid, tab_ai, tab_esg = st.tabs([
     "Canlı Şebeke & Hava Durumu",
-    "Yapay Zekâ Tahmini (24s)",
+    "Yapay Zekâ Tahmini (24s – 1 Yıl)",
     "Kurumsal ESG Simülatörü",
 ])
 
@@ -1626,7 +1626,7 @@ st.markdown(
             Emre Altındağ & Kaan Bölek
         </div>
         <div style="font-size: 0.78rem; color: #5A7163; margin-top: 6px;">
-            Enerji Nabzı · Türkiye Rüzgâr ve Güneş İzleme Platformu
+            Enerji Nabzı · Türkiye Rüzgâr ve Güneş Enerjisi İzleme, İnceleme Platformu
         </div>
     </div>
     """,
