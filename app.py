@@ -393,6 +393,27 @@ div[data-testid="stTabs"] [data-baseweb="tab-border"] {
     }
 }
 
+.grid-4 {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 12px !important;
+    margin: 12px 0 16px 0 !important;
+}
+
+@media (max-width: 1024px) {
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .grid-4 {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+}
+
 .card {
     background: var(--card-bg);
     border: 1px solid var(--line);
@@ -1307,7 +1328,7 @@ with tab_ai:
                     # 4 GERÇEK VE ANLAMLI ÜRETİM TAHMİN KARTI
                     st.markdown(
                         f"""
-                        <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin: 12px 0 16px 0;">
+                        <div class="grid-4">
                             <div class="w-card">
                                 <div class="w-card-header"><span>Tahmini Toplam Üretim</span><span style="color:#7C3AED; font-weight:700;">{horizon_label}</span></div>
                                 <div class="w-card-val">{tr_format(ml_res['total_all'])} <span class="unit">MWh</span></div>
@@ -1490,7 +1511,7 @@ with tab_esg:
             if esg_sim:
                 st.markdown(
                     f"""
-                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin: 12px 0 16px 0;">
+                    <div class="grid-4">
                         <div class="w-card">
                             <div class="w-card-header"><span>Toplam Fabrika Tüketimi</span><span style="color:#2563EB; font-weight:700;">Dönem</span></div>
                             <div class="w-card-val">{tr_format(esg_sim['total_consumed_mwh'])} <span class="unit">MWh</span></div>
