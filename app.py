@@ -600,7 +600,7 @@ st.markdown(
             <span class="status-pill"><i></i>EPİAŞ Gerçek Verisi</span>
         </div>
         <h1>Enerji Nabzı: Türkiye Rüzgâr ve Güneş Enerjisi İzleme ve İnceleme Platformu</h1>
-        <p>Saatlik üretimi, bölgesel hava durumunu, rüzgâr + güneş payını ve tepe üretim saatlerini tek bir ekranda inceleyin.</p>
+        <p>Saatlik üretimi, bölgesel hava durumunu, rüzgâr + güneş payını, yapay zekâ üretim tahminlerini ve tepe üretim saatlerini tek bir ekranda inceleyin.</p>
     </div>
     """,
     unsafe_allow_html=True,
