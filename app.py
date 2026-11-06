@@ -1615,3 +1615,21 @@ with tab_esg:
                     """,
                     unsafe_allow_html=True,
                 )
+
+# ==========================================
+# FOOTER: EMRE ALTINDAĞ & KAAN BÖLEK
+# ==========================================
+st.markdown(
+    """
+    <div style="margin-top: 50px; margin-bottom: 24px; padding-top: 22px; border-top: 1px solid #DCE7DE; text-align: center;">
+        <div style="font-size: 1.05rem; font-weight: 700; color: #172B22; letter-spacing: 0.4px;">
+            Emre Altındağ & Kaan Bölek
+        </div>
+        <div style="font-size: 0.78rem; color: #5A7163; margin-top: 6px;">
+            Enerji Nabzı · Türkiye Rüzgâr ve Güneş İzleme Platformu
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
