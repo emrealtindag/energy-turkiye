@@ -12,9 +12,13 @@ def update_data():
         print(f"Hata: {csv_path} bulunamadı!")
         return
 
-    # Mevcut veriyi oku
+    # Mevcut veriyi formatı belirterek oku
     df = pd.read_csv(csv_path)
-    df["Tarih"] = pd.to_datetime(df["Tarih"])
+
+    # Tarih sütununu esnek şekilde parse et
+    df["Tarih"] = pd.to_datetime(df["Tarih"], dayfirst=True, errors="coerce")
+    df = df.dropna(subset=["Tarih"])
+
     son_tarih = df["Tarih"].max()
     print(f"Mevcut verideki son saat: {son_tarih}")
 
@@ -29,17 +33,20 @@ def update_data():
     )
     bitis = simdi.strftime("%Y-%m-%dT%H:00:00+03:00")
 
-    url = "https://seffaf.epias.com.tr/transparency/service/production/real-time-generation"
+    url = "https://seffaflik.epias.com.tr/transparency/service/production/real-time-generation"
     params = {"startDate": baslangic, "endDate": bitis}
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "application/json",
     }
 
     try:
         res = requests.get(url, params=params, headers=headers, timeout=30)
+        print(f"EPİAŞ bağlantı yanıt kodu: {res.status_code}")
+
         if res.status_code != 200:
-            print(f"EPİAŞ bağlantı yanıt kodu: {res.status_code}")
+            print(f"EPİAŞ yanıt içeriği: {res.text[:200]}")
             return
 
         data = res.json().get("body", {}).get("hourlyGenerations", [])
@@ -66,7 +73,7 @@ def update_data():
 
         yeni_df = pd.DataFrame(yeni_kayitlar)
 
-        # Yeni veriyi ekle ve sırala
+        # Yeni veriyi ekle ve tarihe göre sırala
         df_guncel = pd.concat([df, yeni_df]).drop_duplicates(
             subset=["Tarih"], keep="last"
         )
