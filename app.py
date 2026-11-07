@@ -6,6 +6,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from PIL import Image
 import streamlit as st
+import streamlit.components.v1 as components
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("enerji_dashboard")
@@ -80,7 +81,8 @@ h1, h2, h3, h4, h5, h6, .chart-title, .hero-title {
 
 #MainMenu, footer, header, [data-testid="stHeader"], [data-testid="stSidebar"], [data-testid="collapsedControl"],
 [data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"],
-[class*="viewerBadge"], [class*="ViewerBadge"], .viewerBadge_container__1QSob, .styles_viewerBadge__1yB5_ {
+[class*="viewerBadge"], [class*="ViewerBadge"], .viewerBadge_container__1QSob, .styles_viewerBadge__1yB5_,
+[class*="embeddedAppMetaInfoBar"], div[class*="embeddedAppMetaInfoBar"], .embeddedAppMetaInfoBar_container {
     display: none !important;
 }
 
@@ -532,6 +534,42 @@ div[data-testid="stTabs"] [data-baseweb="tab-border"] {
 </style>""",
     unsafe_allow_html=True,
 )
+
+components.html(
+    """<script>
+    function removeBranding() {
+        try {
+            const targets = [window.document, window.parent.document, window.top.document];
+            targets.forEach(function(doc) {
+                if (!doc) return;
+                const selectors = [
+                    '[class*="viewerBadge"]',
+                    '[class*="embeddedAppMetaInfoBar"]',
+                    'footer',
+                    '#MainMenu',
+                    'header[data-testid="stHeader"]',
+                    '[data-testid="stStatusWidget"]'
+                ];
+                selectors.forEach(function(sel) {
+                    var els = doc.querySelectorAll(sel);
+                    for (var i = 0; i < els.length; i++) {
+                        els[i].style.display = 'none';
+                        els[i].style.visibility = 'hidden';
+                        els[i].style.height = '0px';
+                        els[i].style.opacity = '0';
+                        els[i].style.pointerEvents = 'none';
+                    }
+                });
+            });
+        } catch(e) {}
+    }
+    removeBranding();
+    setInterval(removeBranding, 400);
+    </script>""",
+    height=0,
+    width=0
+)
+
 
 def tr_format(val: float, d: int = 0) -> str:
     if val is None or pd.isna(val):
