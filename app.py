@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from PIL import Image
 import streamlit as st
 
 logging.basicConfig(level=logging.INFO)
@@ -37,7 +38,7 @@ COLS = ["wind_mwh", "solar_mwh", "total_mwh"]
 
 st.set_page_config(
     page_title="Enerji Nabzı · Türkiye Rüzgar ve Güneş Enerjisi İzleme ve Yapay Zeka ile Tahmin Platformu",
-    page_icon="favicon.png",
+    page_icon=Image.open("favicon.png"),
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -77,7 +78,9 @@ h1, h2, h3, h4, h5, h6, .chart-title, .hero-title {
     color: var(--ink);
 }
 
-#MainMenu, footer, header[data-testid="stHeader"], [data-testid="stSidebar"], [data-testid="collapsedControl"] {
+#MainMenu, footer, header, [data-testid="stHeader"], [data-testid="stSidebar"], [data-testid="collapsedControl"],
+[data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"],
+[class*="viewerBadge"], [class*="ViewerBadge"], .viewerBadge_container__1QSob, .styles_viewerBadge__1yB5_ {
     display: none !important;
 }
 
