@@ -2,9 +2,8 @@ name: Günlük EPİAŞ Veri Güncelleme
 
 on:
   schedule:
-    # Her gün Türkiye saatiyle 01:00'de (UTC 22:00) otomatik çalışır
     - cron: '0 22 * * *'
-  workflow_dispatch: # Elle tetikleme seçeneği
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -23,9 +22,11 @@ jobs:
 
       - name: Gerekli Paketleri Yükle
         run: |
-          pip install pandas requests
+          pip install pandas requests eptr2
 
       - name: Güncelleme Betiğini Çalıştır
+        env:
+          EPIAS_PASSWORD: ${{ secrets.EPIAS_PASSWORD }}
         run: |
           python update_pipeline.py
 
