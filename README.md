@@ -17,7 +17,7 @@ COP31 haftası için EPİAŞ Şeffaflık Platformu verileriyle Türkiye'nin rüz
   - 15 dakikalık (900 sn) `st.cache_data` önbellekleme.
 
 - **Veri Katmanı (Kaan):**
-  - `temiz_epias_uretim.csv`: 30 günlük (720 saatlik) temizlenmiş EPİAŞ saatlik üretim veri seti (07.10.2026 — 05.11.2026).
+  - `temiz_epias_uretim.csv`: 1 yıllık (8.760 saatlik) temizlenmiş EPİAŞ saatlik üretim veri seti (01.11.2026 — 31.10.2026).
   - `saatlik_profil.csv`: 24 saatlik ortalama üretim profil tablosu.
   - `src/epias_csv.py`: CSV dosyalarını okuyan, `timestamp` damgasını `Europe/Istanbul` (UTC+3) formatına normalize eden ve `load_generation_data`, `get_latest_complete_window`, `load_hourly_profile` fonksiyonlarını sağlayan veri katmanı.
 
