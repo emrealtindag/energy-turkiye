@@ -37,7 +37,7 @@ COLS = ["wind_mwh", "solar_mwh", "total_mwh"]
 
 st.set_page_config(
     page_title="Enerji Nabzı · Türkiye Rüzgar ve Güneş Enerjisi İzleme ve Yapay Zeka ile Tahmin Platformu",
-    page_icon=None,
+    page_icon="favicon.png",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -586,8 +586,11 @@ st.markdown(
     """
     <div class="hero">
         <div class="hero-top">
-            <span class="eyebrow">YENİLENEBİLİR ENERJİ İZLEME PLATFORMU · ENERJİ NABZI</span>
-            <span class="status-pill"><i></i>EPİAŞ Gerçek Verisi</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="display:inline-block; width:10px; height:10px; background:#10B981; border-radius:50%; box-shadow:0 0 8px #10B981;"></span>
+                <span class="eyebrow">YENİLENEBİLİR ENERJİ İZLEME PLATFORMU · ENERJİ NABZI</span>
+            </div>
+            <span class="status-pill"><i></i>EPİAŞ Gerçek Verisi · Canlı API</span>
         </div>
         <h1>Türkiye Rüzgar ve Güneş Enerjisi İzleme ve Yapay Zeka ile Tahmin Platformu</h1>
         <p>Saatlik üretimi, bölgesel hava durumunu, rüzgar + güneş payını, yapay zeka üretim tahminlerini ve tepe üretim saatlerini tek bir ekranda inceleyin.</p>
@@ -1548,12 +1551,21 @@ with tab_esg:
 
 st.markdown(
     """
-    <div style="margin-top: 50px; margin-bottom: 24px; padding-top: 22px; border-top: 1px solid #DCE7DE; text-align: center;">
-        <div style="font-size: 1.05rem; font-weight: 700; color: #172B22; letter-spacing: 0.4px;">
-            Emre Altındağ & Kaan Bölek
+    <div style="margin-top: 60px; margin-bottom: 28px; padding-top: 24px; border-top: 1px solid #DCE7DE; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 10px; height: 10px; background: #059669; border-radius: 50%;"></span>
+            <span style="font-size: 0.98rem; font-weight: 700; color: #172B22; letter-spacing: 0.6px;">ENERJİ NABZI</span>
         </div>
-        <div style="font-size: 0.78rem; color: #5A7163; margin-top: 6px;">
-            Enerji Nabzı · Türkiye Rüzgar ve Güneş Enerjisi İzleme ve Yapay Zeka ile Tahmin Platformu
+        <div style="font-size: 0.82rem; color: #375240; font-weight: 500;">
+            Türkiye Rüzgar ve Güneş Enerjisi İzleme ve Yapay Zeka ile Tahmin Platformu
+        </div>
+        <div style="font-size: 0.74rem; color: #64748B; max-width: 680px; line-height: 1.6; margin-top: 4px;">
+            Veri Kaynağı: <b>EPİAŞ Şeffaflık Platformu (Canlı API & Saatlik Otomasyon)</b> · TEİAŞ Ulusal İletim Şebekesi
+            <br>
+            Yapay zeka modelleri ve Scope 2 ESG simülasyonları açık veri analitiği karar destek amaçlıdır.
+        </div>
+        <div style="font-size: 0.72rem; color: #94A3B8; margin-top: 4px;">
+            © 2026 Enerji Nabzı Platformu · Tüm Hakları Saklıdır
         </div>
     </div>
     """,
