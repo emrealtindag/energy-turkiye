@@ -579,7 +579,7 @@ if get_latest_complete_window is not None:
         win_start, win_end = None, None
 
 if win_end is None:
-    win_end = date.today() - timedelta(days=1)
+    win_end = full_end if full_end is not None else date.today()
     win_start = win_end - timedelta(days=29)
 
 if full_start is None:
