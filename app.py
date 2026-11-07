@@ -46,7 +46,7 @@ st.set_page_config(
 
 st.markdown(
     """<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..800;1,9..40,400..800&family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400..800;1,9..40,400..800&display=swap&subset=latin,latin-ext');
 
 :root {
     --ink: #0F2417;
@@ -57,18 +57,15 @@ st.markdown(
 }
 
 *, html, body, .stApp, [class*="css"], [class*="st-"], [data-testid="stAppViewContainer"] {
-    font-family: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
-    text-rendering: optimizeLegibility !important;
+    font-family: 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
 .stMarkdown, .stText, p, span, label, div {
-    font-family: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    font-family: 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
 h1, h2, h3, h4, h5, h6, .chart-title, .hero-title {
-    font-family: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-family: 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
     font-weight: 700 !important;
     letter-spacing: -0.025em !important;
     color: var(--ink) !important;
@@ -236,7 +233,7 @@ div[data-testid="stTabs"] button[role="tab"] {
     border: none !important;
     border-radius: 8px !important;
     color: #4A6352 !important;
-    font-family: 'DM Sans', sans-serif !important;
+    font-family: 'Inter', 'DM Sans', sans-serif !important;
     font-weight: 600 !important;
     font-size: 0.92rem !important;
     padding: 9px 16px !important;
