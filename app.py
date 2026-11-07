@@ -571,16 +571,8 @@ if get_dataset_bounds is not None:
     except Exception:
         full_start, full_end = None, None
 
-win_start, win_end = None, None
-if get_latest_complete_window is not None:
-    try:
-        win_start, win_end = get_latest_complete_window(30)
-    except Exception:
-        win_start, win_end = None, None
-
-if win_end is None:
-    win_end = full_end if full_end is not None else date.today()
-    win_start = win_end - timedelta(days=29)
+win_end = full_end if full_end is not None else date.today()
+win_start = win_end - timedelta(days=29)
 
 if full_start is None:
     full_start = win_start
