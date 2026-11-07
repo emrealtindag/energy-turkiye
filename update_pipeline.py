@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 import pandas as pd
 import requests
@@ -35,51 +36,49 @@ def update_data():
         print("Veri zaten güncel, yeni kayıt bulunmuyor.")
         return
 
-    # EPİAŞ web servisinin beklediği format (YYYY-MM-DD)
-    baslangic_gun = (son_tarih + datetime.timedelta(hours=1)).strftime(
-        "%Y-%m-%d"
+    # EPİAŞ 2.0 ISO formatı
+    baslangic = (son_tarih + datetime.timedelta(hours=1)).strftime(
+        "%Y-%m-%dT00:00:00+03:00"
     )
-    bitis_gun = simdi.strftime("%Y-%m-%d")
-    print(f"EPİAŞ'tan çekilen tarih aralığı: {baslangic_gun} -> {bitis_gun}")
+    bitis = simdi.strftime("%Y-%m-%dT23:00:00+03:00")
+    print(f"EPİAŞ'tan çekilen tarih aralığı: {baslangic} -> {bitis}")
 
-    # EPİAŞ Şeffaflık açık JSON uç noktası
-    url = f"https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/real-time-generation?startDate={baslangic_gun}&endDate={bitis_gun}"
+    url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/real-time-generation"
+
+    payload = {"startDate": baslangic, "endDate": bitis}
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Content-Type": "application/json",
         "Accept": "application/json, text/plain, */*",
-        "Referer": "https://seffaflik.epias.com.tr/transparency/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Origin": "https://seffaflik.epias.com.tr",
+        "Referer": "https://seffaflik.epias.com.tr/electricity/generation/real-time-generation",
     }
 
     try:
-        session = requests.Session()
-        res = session.get(url, headers=headers, timeout=25)
+        # POST isteği gönderiyoruz
+        res = requests.post(
+            url, data=json.dumps(payload), headers=headers, timeout=30
+        )
         print(f"EPİAŞ bağlantı yanıt kodu: {res.status_code}")
 
         if res.status_code != 200:
-            # Alternatif açık uç nokta denemesi
-            alt_url = "https://seffaflik.epias.com.tr/transparency/service/production/real-time-generation"
-            res = session.get(
-                alt_url,
-                params={"startDate": baslangic_gun, "endDate": bitis_gun},
-                headers=headers,
-                timeout=25,
-            )
-            print(f"Alternatif uç nokta yanıt kodu: {res.status_code}")
-
-        if res.status_code != 200:
-            print("EPİAŞ servisine ulaşılamadı.")
+            print(f"EPİAŞ Hata Yanıtı: {res.text[:300]}")
             return
 
         json_data = res.json()
-        items = (
-            json_data.get("items")
-            or json_data.get("body", {}).get("hourlyGenerations")
-            or []
-        )
+        items = []
+        if isinstance(json_data, dict):
+            items = (
+                json_data.get("items")
+                or json_data.get("body", {}).get("hourlyGenerations")
+                or []
+            )
+        elif isinstance(json_data, list):
+            items = json_data
 
         if not items:
-            print("Yeni saatlik veri dönmedi.")
+            print("Gelen yanıtta saatlik veri listesi boş.")
             return
 
         yeni_satirlar = []
@@ -87,17 +86,22 @@ def update_data():
             tarih_str = row.get("date")
             dt = pd.to_datetime(tarih_str).tz_localize(None)
 
+            # Sadece mevcut CSV'de olmayan yeni saatleri al
             if dt <= son_tarih:
                 continue
 
             tarih_formati = f"{dt.day}{dt.month:02d}{dt.year}"
             saat_formati = f"{dt.hour:02d}:00"
 
-            ruzgar = float(row.get("wind", row.get("ruzgar", 0.0)))
+            ruzgar = float(row.get("wind") or row.get("ruzgar") or 0.0)
             gunes = float(
-                row.get("sun", row.get("solar", row.get("gunes", 0.0)))
+                row.get("solar")
+                or row.get("sun")
+                or row.get("gunes")
+                or row.get("diger")
+                or 0.0
             )
-            toplam = float(row.get("total", row.get("toplam", 0.0)))
+            toplam = float(row.get("total") or row.get("toplam") or 0.0)
 
             toplam_yenilenebilir = ruzgar + gunes
             oran = (
@@ -117,7 +121,9 @@ def update_data():
             )
 
         if not yeni_satirlar:
-            print("Eklenecek yeni satır bulunamadı.")
+            print(
+                "İncelenen aralıktaki tüm saatler zaten dosyada mevcut, eklenecek kayıt yok."
+            )
             return
 
         yeni_df = pd.DataFrame(yeni_satirlar)
