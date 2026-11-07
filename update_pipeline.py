@@ -22,7 +22,7 @@ def update_data():
     epias_sifre = os.getenv("EPIAS_PASSWORD")
 
     if not epias_sifre:
-        print("Hata: EPIAS_PASSWORD ortam değişkeni bulunamadı!")
+        print("Hata: EPIAS_PASSWORD secret bulunamadı!")
         return
 
     if not os.path.exists(csv_path):
@@ -46,32 +46,56 @@ def update_data():
     try:
         eptr = EPTR2(username=epias_eposta, password=epias_sifre)
 
-        # eptr2 içinde çağrı adını belirle (öncelik 'rtg')
-        cagri_adi = "rtg"
-        try:
-            available = eptr.get_available_calls()
-            avail_list = (
-                list(available.keys())
-                if isinstance(available, dict)
-                else list(available)
-            )
-            if "rtg" not in avail_list:
-                for c in avail_list:
-                    if any(
-                        k in str(c).lower()
-                        for k in ["rtg", "real_time", "generation"]
-                    ):
-                        cagri_adi = c
-                        break
-        except Exception:
-            cagri_adi = "rtg"
+        # 1. Mevcut çağrı listesini al ve loga yazdır
+        available = eptr.get_available_calls()
+        print("--- EPTR2 MEVCUT ÇAĞRILAR ---")
+        print(available)
+        print("-----------------------------")
 
-        print(f"Kullanılan eptr2 çağrısı: {cagri_adi}")
+        # Çağrı adını tespit et
+        cagri_adi = None
+
+        # DataFrame dönerse
+        if isinstance(available, pd.DataFrame):
+            for col in available.columns:
+                matches = available[
+                    available[col]
+                    .astype(str)
+                    .str.lower()
+                    .str.contains("real|rtg|uretim|generation|gzu")
+                ]
+                if not matches.empty:
+                    cagri_adi = matches.iloc[0][col]
+                    break
+        # Liste veya Sözlük dönerse
+        elif isinstance(available, (list, dict)):
+            items = (
+                available.keys() if isinstance(available, dict) else available
+            )
+            for item in items:
+                item_str = str(item).lower()
+                if any(
+                    k in item_str
+                    for k in [
+                        "real_time_generation",
+                        "rtg",
+                        "real-time",
+                        "uretim",
+                        "generation",
+                        "gzu",
+                    ]
+                ):
+                    cagri_adi = item
+                    break
+
+        if not cagri_adi:
+            # Yaygın eptr2 çağrı isimlerinden birini dene
+            cagri_adi = "real_time_generation"
+
+        print(f"Tespit edilen ve çağrılan fonksiyon: '{cagri_adi}'")
         res = eptr.call(cagri_adi, start_date=baslangic, end_date=bitis)
 
-        # Dönen sonuç DataFrame veya sözlük olabilir, ikisini de yönetelim
         yeni_satirlar = []
-
         if isinstance(res, pd.DataFrame):
             raw_records = res.to_dict("records")
         elif isinstance(res, dict):
@@ -84,7 +108,7 @@ def update_data():
             raw_records = []
 
         if not raw_records:
-            print("EPİAŞ'tan yeni saatlik kayıt dönmedi.")
+            print("EPİAŞ'tan yeni veri dönmedi.")
             return
 
         for row in raw_records:
@@ -120,13 +144,13 @@ def update_data():
             )
 
         if not yeni_satirlar:
-            print("İncelenen aralıktaki veriler zaten mevcut.")
+            print("Eklenecek yeni satır yok.")
             return
 
         yeni_df = pd.DataFrame(yeni_satirlar)
         df_guncel = pd.concat([df, yeni_df], ignore_index=True)
         df_guncel.to_csv(csv_path, index=False)
-        print(f"Başarılı: {len(yeni_df)} yeni saatlik kayıt CSV'ye eklendi.")
+        print(f"Başarılı: {len(yeni_df)} saatlik yeni veri eklendi.")
 
         if os.path.exists(profil_path):
             profil = (
