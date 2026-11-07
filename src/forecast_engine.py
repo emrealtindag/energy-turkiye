@@ -26,6 +26,7 @@ def fetch_all_regions_weather() -> Dict[str, Dict[str, Any]]:
     params = {
         "latitude": lats,
         "longitude": lons,
+        "current": "wind_speed_100m,temperature_2m,cloud_cover,direct_normal_irradiance",
         "hourly": "wind_speed_100m,direct_normal_irradiance,cloud_cover,temperature_2m",
         "timezone": "Europe/Istanbul",
         "forecast_days": 1,
@@ -53,18 +54,26 @@ def fetch_all_regions_weather() -> Dict[str, Dict[str, Any]]:
 
     if data is not None:
         for key, d in zip(region_keys, data):
+            curr = d.get("current", {})
             hourly = d.get("hourly", {})
-            w_arr = hourly.get("wind_speed_100m", [20.0])
-            w_speed = float(w_arr[now_hour] if now_hour < len(w_arr) else w_arr[0])
 
-            t_arr = hourly.get("temperature_2m", [12.0])
-            temp = float(t_arr[now_hour] if now_hour < len(t_arr) else t_arr[0])
+            if "wind_speed_100m" in curr:
+                w_speed = float(curr.get("wind_speed_100m", 20.0))
+                temp = float(curr.get("temperature_2m", 12.0))
+                cloud = float(curr.get("cloud_cover", 40.0))
+                s_rad = float(curr.get("direct_normal_irradiance", 0.0))
+            else:
+                w_arr = hourly.get("wind_speed_100m", [20.0])
+                w_speed = float(w_arr[now_hour] if now_hour < len(w_arr) else w_arr[0])
 
-            c_arr = hourly.get("cloud_cover", [40.0])
-            cloud = float(c_arr[now_hour] if now_hour < len(c_arr) else c_arr[0])
+                t_arr = hourly.get("temperature_2m", [12.0])
+                temp = float(t_arr[now_hour] if now_hour < len(t_arr) else t_arr[0])
 
-            solar_arr = hourly.get("direct_normal_irradiance", [0.0])
-            s_rad = float(solar_arr[now_hour] if now_hour < len(solar_arr) else 0.0)
+                c_arr = hourly.get("cloud_cover", [40.0])
+                cloud = float(c_arr[now_hour] if now_hour < len(c_arr) else c_arr[0])
+
+                solar_arr = hourly.get("direct_normal_irradiance", [0.0])
+                s_rad = float(solar_arr[now_hour] if now_hour < len(solar_arr) else 0.0)
 
             if w_speed > 30:
                 w_status = "Kuvvetli Rüzgar / Yüksek Üretim"
