@@ -680,7 +680,7 @@ if ci_data:
 
 tab_grid, tab_ai, tab_esg = st.tabs([
     "Canlı Şebeke & Hava Durumu",
-    "Yapay Zeka Tahmini (24s – 3 Ay)",
+    "Yapay Zeka Tahmini (24 Saatlik)",
     "Kurumsal ESG Simülatörü",
 ])
 
@@ -1234,48 +1234,33 @@ with tab_ai:
     if train_and_evaluate_models is not None:
         try:
             with st.container(border=True):
-                col_pred_title, col_pred_horizon = st.columns([1.4, 1.8], gap="medium")
+                col_pred_title, col_pred_badge = st.columns([2.3, 1], gap="medium")
                 with col_pred_title:
                     st.markdown(
                         """
                         <div>
-                            <h4 class="chart-title">Yapay Zeka Yenilenebilir Üretim Projeksiyonu</h4>
-                            <p class="chart-sub">1 yıllık EPİAŞ saatlik verisi ve astronomik güneş fiziğiyle eğitilen orta ve uzun vadeli üretim projeksiyonu</p>
+                            <h4 class="chart-title">Yapay Zeka Gün Öncesi Yenilenebilir Üretim Projeksiyonu</h4>
+                            <p class="chart-sub">EPİAŞ saatlik verisi ve astronomik güneş fiziğiyle eğitilen 24 saatlik gün öncesi üretim projeksiyonu</p>
                         </div>
                         """,
                         unsafe_allow_html=True,
                     )
-                with col_pred_horizon:
-                    horizon_choice = st.segmented_control(
-                        "Tahmin Vadesi",
-                        options=[
-                            "24 Saatlik (Günlük)",
-                            "7 Günlük (Haftalık)",
-                            "30 Günlük (Aylık)",
-                            "3 Aylık (Çeyreklik)",
-                        ],
-                        default="24 Saatlik (Günlük)",
-                        key="ml_horizon_choice",
+                with col_pred_badge:
+                    st.markdown(
+                        """
+                        <div style="display:flex; justify-content:flex-end; align-items:center; height:100%;">
+                            <span style="display:inline-flex; align-items:center; gap:6px; background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; font-size:0.8rem; font-weight:700; padding:6px 14px; border-radius:9999px;">
+                                <span style="width:8px; height:8px; border-radius:50%; background:#10B981;"></span>
+                                24 Saatlik Gün Öncesi Modeli (GÖP)
+                            </span>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
                     )
 
-                if not horizon_choice:
-                    horizon_choice = "24 Saatlik (Günlük)"
-
-                if horizon_choice == "7 Günlük (Haftalık)":
-                    horizon_hours = 168
-                    horizon_label = "7 Günlük"
-                elif horizon_choice == "30 Günlük (Aylık)":
-                    horizon_hours = 720
-                    horizon_label = "30 Günlük"
-                elif horizon_choice == "3 Aylık (Çeyreklik)":
-                    horizon_hours = 2160
-                    horizon_label = "3 Aylık"
-                else:
-                    horizon_hours = 24
-                    horizon_label = "24 Saatlik"
-
-                with st.spinner(f"{horizon_label} makine öğrenmesi projeksiyonu hesaplanıyor..."):
-                    ml_res = get_cached_ml_results(full_start, full_end, horizon_h=horizon_hours)
+                horizon_hours = 24
+                horizon_label = "24 Saatlik"
+                ml_res = get_cached_ml_results(full_start, full_end, horizon_h=24)
 
                 if ml_res and "forecast_df" in ml_res:
                     f_df = ml_res["forecast_df"]
@@ -1419,9 +1404,7 @@ with tab_ai:
                     st.markdown(
                         f"""
                         <div style="font-size:0.78rem; color:#475569; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px 14px; margin-top:8px; line-height:1.5;">
-                            <b>Projeksiyon Metodolojisi & Karar Destek:</b> Model, 1 yıllık (8.894 saat) tarihsel EPİAŞ verisi ve astronomik güneş deklinasyon fiziği kullanarak 
-                            {horizon_label.lower()} vade boyunca üretim projeksiyonunu hesaplar. Uzun vadelerde (3 Ay, 6 Ay, 1 Yıl) grafik akıcılığı için 
-                            10 günlük dekad dönemleri şeklinde gruplanır; CSV çıktısında ise tüm saatlik detaylar yer alır.
+                            <b>Projeksiyon Metodolojisi & Karar Destek:</b> Model, tarihsel EPİAŞ verisi ve astronomik güneş deklinasyon fiziği (GÖP - Gün Öncesi Piyasası standardı) kullanarak gelecek 24 saat boyunca saatlik rüzgar ve güneş üretim projeksiyonunu hesaplar. CSV çıktısında tüm 24 saatlik detaylar yer alır.
                         </div>
                         """,
                         unsafe_allow_html=True,

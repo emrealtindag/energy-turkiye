@@ -8,10 +8,8 @@ def calculate_solar_elevation(dt: pd.Timestamp, lat: float = 39.0) -> float:
     doy = dt.dayofyear
     decl = np.radians(23.45 * np.sin(np.radians(360.0 / 365.0 * (284 + doy))))
     lat_r = np.radians(lat)
-
     hour_float = dt.hour + dt.minute / 60.0
     hour_angle = np.radians((hour_float - 12.0) * 15.0)
-
     sin_elev = np.sin(lat_r) * np.sin(decl) + np.cos(lat_r) * np.cos(decl) * np.cos(hour_angle)
     sin_elev = np.clip(sin_elev, -1.0, 1.0)
     elevation = np.degrees(np.arcsin(sin_elev))
@@ -27,9 +25,14 @@ def create_feature_matrix(df: pd.DataFrame, target_col: str) -> pd.DataFrame:
     d["sin_hour"] = np.sin(2 * np.pi * d["hour"] / 24.0)
     d["cos_hour"] = np.cos(2 * np.pi * d["hour"] / 24.0)
 
-    s_elev = [calculate_solar_elevation(t) for t in d["ts"]]
-    d["solar_elev"] = s_elev
-    d["solar_flux_pot"] = np.maximum(0.0, np.sin(np.radians(s_elev)))
+    doy = d["ts"].dt.dayofyear.values
+    decl = np.radians(23.45 * np.sin(np.radians(360.0 / 365.0 * (284 + doy))))
+    lat_r = np.radians(39.0)
+    hour_float = d["hour"].values + d["ts"].dt.minute.values / 60.0
+    hour_angle = np.radians((hour_float - 12.0) * 15.0)
+    sin_elev = np.clip(np.sin(lat_r) * np.sin(decl) + np.cos(lat_r) * np.cos(decl) * np.cos(hour_angle), -1.0, 1.0)
+    d["solar_elev"] = np.degrees(np.arcsin(sin_elev))
+    d["solar_flux_pot"] = np.maximum(0.0, np.sin(np.radians(d["solar_elev"])))
 
     d["lag_1"] = d[target_col].shift(1)
     d["lag_2"] = d[target_col].shift(2)
@@ -47,7 +50,7 @@ def train_and_evaluate_models(
     if historical_df.empty or len(historical_df) < 120:
         return {}
 
-    df = historical_df.copy()
+    df = historical_df.tail(1440).copy()
     if "ts" not in df.columns:
         df["ts"] = pd.to_datetime(df["timestamp"])
 
@@ -68,13 +71,13 @@ def train_and_evaluate_models(
     wind_features = create_feature_matrix(df, "wind_mwh")
     X_w = wind_features[feature_cols].values
     y_w = wind_features["wind_mwh"].values
-    wind_model = HistGradientBoostingRegressor(max_iter=90, random_state=42)
+    wind_model = HistGradientBoostingRegressor(max_iter=40, random_state=42)
     wind_model.fit(X_w, y_w)
 
     solar_features = create_feature_matrix(df, "solar_mwh")
     X_s = solar_features[feature_cols].values
     y_s = solar_features["solar_mwh"].values
-    solar_model = HistGradientBoostingRegressor(max_iter=90, random_state=42)
+    solar_model = HistGradientBoostingRegressor(max_iter=40, random_state=42)
     solar_model.fit(X_s, y_s)
 
     last_ts = df["ts"].iloc[-1]
