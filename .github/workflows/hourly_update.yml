@@ -29,6 +29,7 @@ jobs:
       - name: Pipeline Betiğini Çalıştır
         env:
           EPIAS_PASSWORD: ${{ secrets.EPIAS_PASSWORD }}
+          TZ: 'Europe/Istanbul'
         run: |
           python update_pipeline.py
 
