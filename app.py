@@ -1260,7 +1260,8 @@ with tab_ai:
 
                 horizon_hours = 24
                 horizon_label = "24 Saatlik"
-                ml_res = get_cached_ml_results(full_start, full_end, horizon_h=24)
+                with st.spinner("24 saatlik gün öncesi projeksiyonu hesaplanıyor..."):
+                    ml_res = get_cached_ml_results(full_start, full_end, horizon_h=24)
 
                 if ml_res and "forecast_df" in ml_res:
                     f_df = ml_res["forecast_df"]
@@ -1298,36 +1299,10 @@ with tab_ai:
                         unsafe_allow_html=True,
                     )
 
-                    if horizon_hours == 24:
-                        plot_df = f_df.copy()
-                        plot_x = [t.strftime("%H:00") for t in plot_df["ts"]]
-                        hover_unit = "MWh/saat"
-                        x_label = "Gelecek 24 Saat (Saatlik)"
-                    elif horizon_hours == 168:
-                        plot_df = f_df.copy()
-                        plot_x = [f"{t.day:02d} {MONTHS[t.month]} {t.hour:02d}:00" for t in plot_df["ts"]]
-                        hover_unit = "MWh/saat"
-                        x_label = "Gelecek 7 Gün (Saatlik)"
-                    elif horizon_hours == 720:
-                        plot_df = f_df.resample("1D", on="ts").mean().reset_index()
-                        plot_x = [f"{t.day:02d} {MONTHS[t.month]}" for t in plot_df["ts"]]
-                        hover_unit = "Günlük Ort. MWh/saat"
-                        x_label = "Gelecek 30 Gün (Günlük Ortalama)"
-                    elif horizon_hours == 2160:
-                        plot_df = f_df.resample("5D", on="ts").mean().reset_index()
-                        plot_x = [f"{t.day:02d} {MONTHS[t.month]}" for t in plot_df["ts"]]
-                        hover_unit = "5 Günlük Ort. MWh/saat"
-                        x_label = "Gelecek 3 Aylık Projeksiyon (5 Günlük Dönemler)"
-                    elif horizon_hours == 4320:
-                        plot_df = f_df.resample("10D", on="ts").mean().reset_index()
-                        plot_x = [f"{t.day:02d} {MONTHS[t.month]}" for t in plot_df["ts"]]
-                        hover_unit = "10 Günlük Dekad Ort. MWh/saat"
-                        x_label = "Gelecek 6 Aylık Projeksiyon (10 Günlük Dekad Aralıkları)"
-                    else:
-                        plot_df = f_df.resample("10D", on="ts").mean().reset_index()
-                        plot_x = [f"{t.day:02d} {MONTHS[t.month]}" for t in plot_df["ts"]]
-                        hover_unit = "10 Günlük Dekad Ort. MWh/saat"
-                        x_label = "Gelecek 1 Yıllık Projeksiyon (10 Günlük Dekad Aralıkları)"
+                    plot_df = f_df.copy()
+                    plot_x = [f"{t.strftime('%H:00')} ({t.day:02d} {MONTHS[t.month]})" for t in plot_df["ts"]]
+                    hover_unit = "MWh/saat"
+                    x_label = "Gelecek 24 Saatlik GÖP Projeksiyonu"
 
                     fig_ml = go.Figure()
                     fig_ml.add_trace(
@@ -1335,9 +1310,9 @@ with tab_ai:
                             x=plot_x,
                             y=plot_df["wind_pred"],
                             name="Tahmini Rüzgar (Yeşil)",
-                            mode="lines+markers" if horizon_hours > 720 else "lines",
+                            mode="lines",
                             line=dict(color=WIND_COLOR, width=2.2),
-                            marker=dict(size=5) if horizon_hours > 720 else None,
+                            marker=None,
                             fill="tozeroy",
                             fillcolor="rgba(5, 150, 105, 0.08)",
                             hovertemplate=f"Tahmini Rüzgar: %{{y:,.0f}} {hover_unit}<extra></extra>",
@@ -1348,9 +1323,9 @@ with tab_ai:
                             x=plot_x,
                             y=plot_df["solar_pred"],
                             name="Tahmini Güneş (Turuncu)",
-                            mode="lines+markers" if horizon_hours > 720 else "lines",
+                            mode="lines",
                             line=dict(color=SUN_COLOR, width=2.2),
-                            marker=dict(size=5) if horizon_hours > 720 else None,
+                            marker=None,
                             fill="tozeroy",
                             fillcolor="rgba(234, 179, 8, 0.14)",
                             hovertemplate=f"Tahmini Güneş: %{{y:,.0f}} {hover_unit}<extra></extra>",
