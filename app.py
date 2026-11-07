@@ -564,20 +564,18 @@ def get_cached_ml_results(start_d: date, end_d: date, horizon_h: int = 24) -> di
     base_data = fetch_generation_data(start_d, end_d)
     return train_and_evaluate_models(base_data, horizon_hours=horizon_h)
 
-full_start, full_end = None, None
+full_start = None
 if get_dataset_bounds is not None:
     try:
-        full_start, full_end = get_dataset_bounds()
+        full_start, _ = get_dataset_bounds()
     except Exception:
-        full_start, full_end = None, None
+        full_start = None
 
-win_end = full_end if full_end is not None else date.today()
+full_end = date.today()
+win_end = date.today()
 win_start = win_end - timedelta(days=29)
-
 if full_start is None:
     full_start = win_start
-if full_end is None:
-    full_end = win_end
 
 all_weather = fetch_all_regions_weather()
 baseline_df = fetch_generation_data(win_start, win_end)
