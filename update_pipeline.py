@@ -44,31 +44,63 @@ def update_data():
     print(f"EPİAŞ'tan çekilen tarih aralığı: {baslangic} -> {bitis}")
 
     try:
-        # EPİAŞ resmi istemcisi başlatılıyor
         eptr = EPTR2(username=epias_eposta, password=epias_sifre)
 
-        # Gerçek zamanlı üretim verisini çek
-        res = eptr.call(
-            "real-time-generation", start_date=baslangic, end_date=bitis
-        )
+        # eptr2 içinde çağrı adını belirle (öncelik 'rtg')
+        cagri_adi = "rtg"
+        try:
+            available = eptr.get_available_calls()
+            avail_list = (
+                list(available.keys())
+                if isinstance(available, dict)
+                else list(available)
+            )
+            if "rtg" not in avail_list:
+                for c in avail_list:
+                    if any(
+                        k in str(c).lower()
+                        for k in ["rtg", "real_time", "generation"]
+                    ):
+                        cagri_adi = c
+                        break
+        except Exception:
+            cagri_adi = "rtg"
 
-        items = res.get("items", [])
-        if not items:
-            print("Yeni kayıt dönmedi.")
+        print(f"Kullanılan eptr2 çağrısı: {cagri_adi}")
+        res = eptr.call(cagri_adi, start_date=baslangic, end_date=bitis)
+
+        # Dönen sonuç DataFrame veya sözlük olabilir, ikisini de yönetelim
+        yeni_satirlar = []
+
+        if isinstance(res, pd.DataFrame):
+            raw_records = res.to_dict("records")
+        elif isinstance(res, dict):
+            raw_records = (
+                res.get("items")
+                or res.get("body", {}).get("hourlyGenerations")
+                or []
+            )
+        else:
+            raw_records = []
+
+        if not raw_records:
+            print("EPİAŞ'tan yeni saatlik kayıt dönmedi.")
             return
 
-        yeni_satirlar = []
-        for row in items:
-            dt = pd.to_datetime(row.get("date")).tz_localize(None)
+        for row in raw_records:
+            dt_raw = row.get("date") or row.get("tarih") or row.get("time")
+            dt = pd.to_datetime(dt_raw).tz_localize(None)
             if dt <= son_tarih:
                 continue
 
             tarih_formati = f"{dt.day}{dt.month:02d}{dt.year}"
             saat_formati = f"{dt.hour:02d}:00"
 
-            ruzgar = float(row.get("wind", 0.0))
-            gunes = float(row.get("sun", row.get("solar", 0.0)))
-            toplam = float(row.get("total", 0.0))
+            ruzgar = float(row.get("wind") or row.get("ruzgar") or 0.0)
+            gunes = float(
+                row.get("sun") or row.get("solar") or row.get("gunes") or 0.0
+            )
+            toplam = float(row.get("total") or row.get("toplam") or 0.0)
 
             toplam_yenilenebilir = ruzgar + gunes
             oran = (
@@ -88,13 +120,13 @@ def update_data():
             )
 
         if not yeni_satirlar:
-            print("Eklenecek yeni kayıt bulunamadı.")
+            print("İncelenen aralıktaki veriler zaten mevcut.")
             return
 
         yeni_df = pd.DataFrame(yeni_satirlar)
         df_guncel = pd.concat([df, yeni_df], ignore_index=True)
         df_guncel.to_csv(csv_path, index=False)
-        print(f"Başarılı: {len(yeni_df)} saatlik yeni veri eklendi.")
+        print(f"Başarılı: {len(yeni_df)} yeni saatlik kayıt CSV'ye eklendi.")
 
         if os.path.exists(profil_path):
             profil = (
