@@ -5,7 +5,6 @@ import requests
 
 
 def parse_custom_date(tarih_val, saat_val):
-    """1112025 veya 5112026 ve 23:00 formatındaki veriyi datetime objesine çevirir."""
     t_str = str(tarih_val).split(".")[0].strip()
     s_str = str(saat_val).strip()
 
@@ -25,10 +24,8 @@ def update_data():
         print(f"Hata: {csv_path} bulunamadı!")
         return
 
-    # Mevcut veriyi oku
     df = pd.read_csv(csv_path)
 
-    # Son satırdan tam tarihi al
     son_satir = df.iloc[-1]
     son_tarih = parse_custom_date(son_satir["Tarih"], son_satir["Saat"])
     print(f"Mevcut verideki son saat: {son_tarih}")
@@ -38,40 +35,61 @@ def update_data():
         print("Veri zaten güncel, yeni kayıt bulunmuyor.")
         return
 
-    # Sadece eksik olan 1-2 günlük aralığı iste
-    baslangic = (son_tarih + datetime.timedelta(hours=1)).strftime(
-        "%Y-%m-%dT%H:00:00+03:00"
+    # EPİAŞ web servisinin beklediği format (YYYY-MM-DD)
+    baslangic_gun = (son_tarih + datetime.timedelta(hours=1)).strftime(
+        "%Y-%m-%d"
     )
-    bitis = simdi.strftime("%Y-%m-%dT%H:00:00+03:00")
-    print(f"EPİAŞ'tan istenen aralık: {baslangic} -> {bitis}")
+    bitis_gun = simdi.strftime("%Y-%m-%d")
+    print(f"EPİAŞ'tan çekilen tarih aralığı: {baslangic_gun} -> {bitis_gun}")
 
-    url = "https://seffaflik.epias.com.tr/transparency/service/production/real-time-generation"
-    params = {"startDate": baslangic, "endDate": bitis}
+    # EPİAŞ Şeffaflık açık JSON uç noktası
+    url = f"https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/real-time-generation?startDate={baslangic_gun}&endDate={bitis_gun}"
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Referer": "https://seffaflik.epias.com.tr/transparency/",
     }
 
     try:
-        res = requests.get(url, params=params, headers=headers, timeout=60)
+        session = requests.Session()
+        res = session.get(url, headers=headers, timeout=25)
         print(f"EPİAŞ bağlantı yanıt kodu: {res.status_code}")
 
         if res.status_code != 200:
-            print(f"EPİAŞ yanıt içeriği: {res.text[:200]}")
+            # Alternatif açık uç nokta denemesi
+            alt_url = "https://seffaflik.epias.com.tr/transparency/service/production/real-time-generation"
+            res = session.get(
+                alt_url,
+                params={"startDate": baslangic_gun, "endDate": bitis_gun},
+                headers=headers,
+                timeout=25,
+            )
+            print(f"Alternatif uç nokta yanıt kodu: {res.status_code}")
+
+        if res.status_code != 200:
+            print("EPİAŞ servisine ulaşılamadı.")
             return
 
-        data = res.json().get("body", {}).get("hourlyGenerations", [])
-        if not data:
-            print("Çekilecek yeni saatlik veri dönmedi.")
+        json_data = res.json()
+        items = (
+            json_data.get("items")
+            or json_data.get("body", {}).get("hourlyGenerations")
+            or []
+        )
+
+        if not items:
+            print("Yeni saatlik veri dönmedi.")
             return
 
         yeni_satirlar = []
-        for row in data:
+        for row in items:
             tarih_str = row.get("date")
-            dt = pd.to_datetime(tarih_str)
+            dt = pd.to_datetime(tarih_str).tz_localize(None)
 
-            # Orijinal CSV formatı: Tarih (g+aa+yyyy -> 5112026), Saat (23:00)
+            if dt <= son_tarih:
+                continue
+
             tarih_formati = f"{dt.day}{dt.month:02d}{dt.year}"
             saat_formati = f"{dt.hour:02d}:00"
 
@@ -98,14 +116,15 @@ def update_data():
                 }
             )
 
-        yeni_df = pd.DataFrame(yeni_satirlar)
+        if not yeni_satirlar:
+            print("Eklenecek yeni satır bulunamadı.")
+            return
 
-        # Mevcut verinin altına ekle
+        yeni_df = pd.DataFrame(yeni_satirlar)
         df_guncel = pd.concat([df, yeni_df], ignore_index=True)
         df_guncel.to_csv(csv_path, index=False)
         print(f"Başarılı: {len(yeni_df)} yeni saatlik kayıt CSV'ye eklendi.")
 
-        # 24 Saatlik ortalama profil tablosunu güncelle
         if os.path.exists(profil_path):
             profil = (
                 df_guncel.groupby("Saat")[["Rüzgar", "Güneş"]]
