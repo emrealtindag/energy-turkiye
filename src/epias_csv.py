@@ -9,21 +9,22 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 
 def _find_file(preferred_names: list[str]) -> Path:
-
+    candidates = []
     for name in preferred_names:
-
-        p_data = ROOT / "data" / name
-
-        if p_data.exists():
-
-            return p_data
-
-        p_root = ROOT / name
-
-        if p_root.exists():
-
-            return p_root
-
+        candidates.extend([
+            ROOT / "data" / name,
+            ROOT / name,
+            Path.cwd() / "data" / name,
+            Path.cwd() / name,
+            Path("/mount/src/energy-turkiye/data") / name,
+            Path("/mount/src/energy-turkiye") / name,
+        ])
+    for p in candidates:
+        try:
+            if p.is_file() and p.stat().st_size > 0:
+                return p
+        except Exception:
+            continue
     return ROOT / "data" / preferred_names[0]
 
 def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
