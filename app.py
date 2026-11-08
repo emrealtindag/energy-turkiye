@@ -792,10 +792,25 @@ with tab_grid:
             marker_sizes = np.clip(df_map["wind_kmh"] * 0.45 + 13.0, 18.0, 30.0)
             fig_tr = go.Figure()
             fig_tr.add_trace(
+                go.Choropleth(
+                    locations=["TUR"],
+                    locationmode="ISO-3",
+                    z=[1],
+                    colorscale=[[0, "#FEF3C7"], [1, "#FED7AA"]],
+                    showscale=False,
+                    showlegend=False,
+                    hoverinfo="skip",
+                    marker=dict(
+                        line=dict(color="#F59E0B", width=1.8),
+                    ),
+                )
+            )
+            fig_tr.add_trace(
                 go.Scattergeo(
                     lon=df_map["lon"],
                     lat=df_map["lat"],
                     text=df_map["region"],
+                    showlegend=False,
                     customdata=np.stack([
                         df_map["wind_kmh"],
                         df_map["wind_status"],
@@ -817,7 +832,7 @@ with tab_grid:
                         colorscale=[[0, "#A7F3D0"], [0.5, "#10B981"], [1.0, "#047857"]],
                         colorbar=dict(title=dict(text="km/s", font=dict(size=10)), thickness=10, len=0.7),
                         line=dict(width=1.5, color="#065F46"),
-                        opacity=0.9,
+                        opacity=0.95,
                     ),
                 )
             )
@@ -828,17 +843,18 @@ with tab_grid:
                 visible=True,
                 resolution=50,
                 showcountries=True,
-                countrycolor="#94A3B8",
+                countrycolor="#CBD5E1",
                 showcoastlines=True,
                 coastlinecolor="#CBD5E1",
                 showland=True,
-                landcolor="#F8FAFC",
+                landcolor="#F1F5F9",
                 showocean=True,
                 oceancolor="#E8F1EB",
                 projection_type="mercator",
             )
             fig_tr.update_layout(
                 height=310,
+                showlegend=False,
                 margin=dict(l=0, r=0, t=10, b=5),
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
