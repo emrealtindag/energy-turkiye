@@ -764,44 +764,35 @@ with tab_grid:
                     "desc": reg_v.get("desc", ""),
                 })
             df_map = pd.DataFrame(map_rows)
-            short_names = [r.replace(" Bölgesi", "").replace("Güneydoğu Anadolu", "Güneydoğu") for r in df_map["region"]]
-            df_map["short_name"] = short_names
             marker_sizes = np.clip(df_map["wind_kmh"] * 0.45 + 13.0, 18.0, 30.0)
             fig_tr = go.Figure()
             fig_tr.add_trace(
                 go.Scattergeo(
                     lon=df_map["lon"],
                     lat=df_map["lat"],
-                    text=df_map["short_name"],
+                    text=df_map["region"],
                     customdata=np.stack([
                         df_map["wind_kmh"],
                         df_map["wind_status"],
                         df_map["temp_c"],
                         df_map["solar_wm2"],
                         df_map["desc"],
-                        df_map["region"],
                     ], axis=-1),
-                    hovertemplate="<b>%{customdata[5]}</b><br>"
+                    hovertemplate="<b>%{text}</b><br>"
                                   "Havza: %{customdata[4]}<br>"
                                   "Rüzgar Hızı: %{customdata[0]} km/s (%{customdata[1]})<br>"
                                   "Sıcaklık: %{customdata[2]} °C<br>"
                                   "Güneş Işınımı: %{customdata[3]} W/m²<extra></extra>",
                     mode="markers+text",
                     textposition="top center",
-                    textfont=dict(size=10.0, family="Plus Jakarta Sans, sans-serif", color="#1E293B"),
+                    textfont=dict(size=11, family="Plus Jakarta Sans, sans-serif", color="#1E293B"),
                     marker=dict(
                         size=marker_sizes,
                         color=df_map["wind_kmh"],
                         colorscale=[[0, "#A7F3D0"], [0.5, "#10B981"], [1.0, "#047857"]],
-                        colorbar=dict(
-                            title=dict(text="km/s", font=dict(size=9)),
-                            thickness=8,
-                            len=0.6,
-                            x=0.98,
-                            y=0.5,
-                        ),
-                        line=dict(width=1.6, color="#065F46"),
-                        opacity=0.92,
+                        colorbar=dict(title=dict(text="km/s", font=dict(size=10)), thickness=10, len=0.7),
+                        line=dict(width=1.5, color="#065F46"),
+                        opacity=0.9,
                     ),
                 )
             )
