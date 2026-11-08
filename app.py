@@ -766,7 +766,7 @@ with tab_grid:
             df_map = pd.DataFrame(map_rows)
             short_names = [r.replace(" Bölgesi", "").replace("Güneydoğu Anadolu", "Güneydoğu") for r in df_map["region"]]
             df_map["short_name"] = short_names
-            marker_sizes = np.clip(df_map["wind_kmh"] * 0.32 + 11.0, 13.0, 23.0)
+            marker_sizes = np.clip(df_map["wind_kmh"] * 0.45 + 13.0, 18.0, 30.0)
             fig_tr = go.Figure()
             fig_tr.add_trace(
                 go.Scattergeo(
@@ -788,7 +788,7 @@ with tab_grid:
                                   "Güneş Işınımı: %{customdata[3]} W/m²<extra></extra>",
                     mode="markers+text",
                     textposition="top center",
-                    textfont=dict(size=9.5, family="Plus Jakarta Sans, sans-serif", color="#1E293B"),
+                    textfont=dict(size=10.0, family="Plus Jakarta Sans, sans-serif", color="#1E293B"),
                     marker=dict(
                         size=marker_sizes,
                         color=df_map["wind_kmh"],
@@ -800,7 +800,7 @@ with tab_grid:
                             x=0.98,
                             y=0.5,
                         ),
-                        line=dict(width=1.2, color="#065F46"),
+                        line=dict(width=1.6, color="#065F46"),
                         opacity=0.92,
                     ),
                 )
