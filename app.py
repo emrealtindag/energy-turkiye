@@ -34,14 +34,7 @@ except Exception:
         get_latest_complete_window = None
         load_hourly_profile = None
 
-_orig_markdown = st.markdown
-
-def _safe_markdown(body, *args, **kwargs):
-    if kwargs.get("unsafe_allow_html") and isinstance(body, str):
-        body = textwrap.dedent(body).strip()
-    return _orig_markdown(body, *args, **kwargs)
-
-st.markdown = _safe_markdown
+from src.i18n import get_lang, install_streamlit_i18n
 from src.forecast_engine import REGIONS, calculate_esg_savings, fetch_all_regions_weather
 from src.ml_forecaster import train_and_evaluate_models
 from src.esg_analytics import (
@@ -61,6 +54,8 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+
+install_streamlit_i18n()
 
 st.markdown(
     """<style>
@@ -367,7 +362,7 @@ div[data-testid="stTabs"] [data-baseweb="tab-border"] {
     font-weight: 600;
     color: #059669;
 }
-.meta-pills {
+.meta-pills, .meta-grid {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
@@ -589,6 +584,8 @@ components.html(
 def tr_format(val: float, d: int = 0) -> str:
     if val is None or pd.isna(val):
         return "–"
+    if get_lang() == "EN":
+        return f"{val:,.{d}f}"
     return f"{val:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 def date_label(d: date) -> str:
@@ -637,6 +634,16 @@ all_weather = fetch_all_regions_weather()
 baseline_df = fetch_generation_data(win_start, win_end)
 ci_data = calculate_grid_carbon_intensity(baseline_df) if calculate_grid_carbon_intensity is not None else None
 clean_df = baseline_df.copy()
+
+col_lang_spacer, col_lang_bar = st.columns([5.2, 1.1])
+with col_lang_bar:
+    st.segmented_control(
+        "Dil / Language",
+        options=["TR · Türkçe", "EN · English"],
+        default="TR · Türkçe",
+        key="app_lang_selector",
+        label_visibility="collapsed",
+    )
 
 st.markdown(
     """
@@ -1005,7 +1012,7 @@ with tab_grid:
         + build_card("total", "Rüzgar + Güneş", tr_format(pair_sum) if pair_sum is not None else "Veri Yok", "MWh", "İki kaynağın toplamı")
         + build_card("pct", "Rüzgar + Güneş Payı", share_str, "", "Toplam üretimdeki oran")
         + build_card("peak", "Saatlik Zirve", peak_val_str, peak_unit, peak_time_str)
-        + build_card("esg", "Önlenen CO₂ Salımı", esg_data["co2_formatted"], "ton", "~0,45 tCO₂ / MWh ikamesi")
+        + build_card("esg", "Önlenen CO₂ Salımı", tr_format((pair_sum or 0.0) * 0.45, 0) if pair_sum is not None else esg_data["co2_formatted"], "ton", "~0,45 tCO₂ / MWh ikamesi")
         + "</div>",
         unsafe_allow_html=True,
     )
