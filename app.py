@@ -695,7 +695,7 @@ if ci_data:
 
 tab_grid, tab_ai, tab_esg = st.tabs([
     "Canlı Şebeke & Hava Durumu",
-    "Yapay Zeka Tahmini (24 Saat – 1 Ay)",
+    "Yapay Zeka Tahmini (24 Saat – 2 Ay)",
     "Kurumsal ESG Simülatörü",
 ])
 
@@ -1268,6 +1268,7 @@ with tab_ai:
                             "24 Saatlik (Günlük GÖP)",
                             "7 Günlük (Haftalık)",
                             "30 Günlük (Aylık)",
+                            "60 Günlük (2 Aylık)",
                         ],
                         default="24 Saatlik (Günlük GÖP)",
                         key="ml_horizon_choice",
@@ -1282,6 +1283,9 @@ with tab_ai:
                 elif horizon_choice == "30 Günlük (Aylık)":
                     horizon_hours = 720
                     horizon_label = "30 Günlük"
+                elif horizon_choice == "60 Günlük (2 Aylık)":
+                    horizon_hours = 1440
+                    horizon_label = "60 Günlük"
                 else:
                     horizon_hours = 24
                     horizon_label = "24 Saatlik"
@@ -1339,7 +1343,7 @@ with tab_ai:
                         plot_df = f_df.resample("1D", on="ts").mean().reset_index()
                         plot_x = [f"{t.day:02d} {MONTHS[t.month]}" for t in plot_df["ts"]]
                         hover_unit = "Günlük Ort. MWh/saat"
-                        x_label = "Gelecek 30 Günlük Projeksiyon (Günlük Ortalama)"
+                        x_label = f"Gelecek {horizon_label} Projeksiyon (Günlük Ortalama)"
 
                     fig_ml = go.Figure()
                     fig_ml.add_trace(
@@ -1416,7 +1420,7 @@ with tab_ai:
                     st.markdown(
                         f"""
                         <div style="font-size:0.78rem; color:#475569; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px 14px; margin-top:8px; line-height:1.5;">
-                            <b>Projeksiyon Metodolojisi & Karar Destek:</b> Model, tarihsel EPİAŞ verisi ve astronomik güneş fiziği kullanarak seçilen vade ({horizon_label.lower()}) boyunca üretim projeksiyonunu hesaplar. 30 günlük vadede grafik akıcılığı için günlük ortalamalar gösterilir; CSV çıktısında ise tüm saatlik detaylar yer alır.
+                            <b>Projeksiyon Metodolojisi & Karar Destek:</b> Model, tarihsel EPİAŞ verisi ve astronomik güneş fiziği kullanarak seçilen vade ({horizon_label.lower()}) boyunca üretim projeksiyonunu hesaplar. Uzun vadelerde grafik akıcılığı için günlük ortalamalar gösterilir; CSV çıktısında ise tüm saatlik detaylar yer alır.
                         </div>
                         """,
                         unsafe_allow_html=True,
